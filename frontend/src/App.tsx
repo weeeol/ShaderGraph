@@ -1,4 +1,5 @@
-import React, { useCallback, useRef, useState, useEffect, DragEvent } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
+import type { DragEvent } from 'react';
 import {
   ReactFlow,
   Background,
@@ -31,6 +32,8 @@ function ShaderGraph() {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, compile, addNode } = useGraphStore();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isDockOpen, setIsDockOpen] = useState(true);
 
   useEffect(() => {
     compile();
@@ -65,14 +68,23 @@ function ShaderGraph() {
 
   return (
     <div className="w-screen h-screen flex flex-col bg-primary overflow-hidden text-text selection:bg-accent/30">
-      <Header />
+      <Header 
+        isSidebarOpen={isSidebarOpen} 
+        isDockOpen={isDockOpen} 
+        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        toggleDock={() => setIsDockOpen(!isDockOpen)}
+      />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         {/* Left Sidebar */}
-        <Sidebar />
+        {isSidebarOpen && (
+          <div className="w-64 h-full shrink-0 z-10 shadow-2xl transition-all duration-300 relative">
+            <Sidebar />
+          </div>
+        )}
 
         {/* Main Graph Area */}
-        <div className="flex-1 flex flex-col relative h-full" ref={reactFlowWrapper}>
+        <div className="flex-1 flex flex-col relative h-full min-w-0" ref={reactFlowWrapper}>
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -89,25 +101,27 @@ function ShaderGraph() {
             className="bg-primary"
             proOptions={{ hideAttribution: true }}
           >
-            <Background color="#3f3f4e" gap={20} size={1} />
-            <Controls className="bg-secondary border-border fill-text shadow-lg" />
+            <Background color="#27272a" gap={24} size={1.5} />
+            <Controls className="!bg-secondary !border-border !fill-text-muted hover:!fill-text shadow-xl rounded-lg overflow-hidden" />
             <MiniMap 
-              nodeColor="#3b82f6" 
-              maskColor="rgba(30, 30, 36, 0.7)" 
-              className="bg-secondary border border-border"
+              nodeColor="#6366f1" 
+              maskColor="rgba(9, 9, 11, 0.7)" 
+              className="bg-secondary/80 backdrop-blur-md border border-border rounded-lg shadow-xl"
             />
           </ReactFlow>
         </div>
 
         {/* Right Dock */}
-        <div className="w-[400px] h-full flex flex-col border-l border-border shrink-0 z-10 bg-secondary shadow-[-4px_0_15px_rgba(0,0,0,0.2)]">
-          <div className="h-[400px] shrink-0">
-            <LiveViewport />
+        {isDockOpen && (
+          <div className="w-[400px] h-full flex flex-col shrink-0 z-10 border-l border-border bg-secondary/95 shadow-2xl transition-all duration-300">
+            <div className="h-[350px] shrink-0 border-b border-border/50">
+              <LiveViewport />
+            </div>
+            <div className="flex-1 min-h-[200px]">
+              <GLSLViewer />
+            </div>
           </div>
-          <div className="flex-1 overflow-hidden">
-            <GLSLViewer />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

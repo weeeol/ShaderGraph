@@ -14,8 +14,7 @@ import {
   applyNodeChanges,
   applyEdgeChanges
 } from '@xyflow/react';
-import type { GraphNode, GraphEdge, NodeDefinition } from '../core/engine/types';
-import type { NodeRegistry } from '../core/engine/compiler';
+import type { GraphNode, GraphEdge } from '../core/engine/types';
 import { transpileGraphToGLSL } from '../core/engine/compiler';
 
 import { NODE_REGISTRY } from '../core/nodes/registry';

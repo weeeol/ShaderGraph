@@ -1,9 +1,9 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
 import { NODE_REGISTRY } from '../../core/nodes/registry';
 import { useGraphStore } from '../../store/useGraphStore';
-import type { DataType } from '../../core/engine/types';
+
 
 // Helper to convert normalized RGB array to Hex
 const rgbToHex = (arr: number[]) => {
@@ -34,20 +34,20 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
     updateNodeData(id, portId, val);
   };
 
-  const renderInputControl = (portId: string, dataType: DataType, defaultValue: any) => {
-    const currentValue = data[portId] !== undefined ? data[portId] : defaultValue;
+  const renderInputControl = (input: any) => {
+    const portId = input.id;
+    const dataType = input.type;
+    const currentValue = data[portId] !== undefined ? data[portId] : input.defaultValue;
     
     if (dataType === 'float') {
       return (
-        <div className="flex items-center gap-1">
-          <input 
-            type="number" 
-            step="0.01"
-            value={currentValue} 
-            onChange={(e) => handleInputChange(portId, parseFloat(e.target.value) || 0)}
-            className="w-16 bg-primary border border-border text-xs text-text p-1 rounded nodrag"
-          />
-        </div>
+        <input 
+          type="number"
+          step="0.1"
+          value={currentValue}
+          onChange={(e) => handleInputChange(portId, parseFloat(e.target.value) || 0)}
+          className="w-12 bg-primary/50 border border-border/50 text-text text-[10px] px-1 py-0.5 rounded focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent ml-auto shadow-inner"
+        />
       );
     }
     
@@ -57,40 +57,53 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
       const arr = Array.isArray(currentValue) ? currentValue : Array(compCount).fill(0);
       
       if (isColor && (dataType === 'vec3' || dataType === 'vec4')) {
-        const hex = rgbToHex(arr);
+        const colorHex = rgbToHex(arr);
+        const isVec4 = dataType === 'vec4';
+        const alpha = arr[3] !== undefined ? arr[3] : 1.0;
+        
+        const handleColorChange = (e: any, type: 'hex' | 'alpha') => {
+          if (type === 'hex') {
+            const rgb = hexToRgb(e.target.value);
+            handleInputChange(portId, isVec4 ? [...rgb, alpha] : rgb);
+          } else {
+            handleInputChange(portId, [arr[0], arr[1], arr[2], parseFloat(e.target.value)]);
+          }
+        };
+
         return (
-          <div className="flex flex-col gap-1 nodrag">
-            <input 
-              type="color" 
-              value={hex}
-              onChange={(e) => {
-                const rgb = hexToRgb(e.target.value);
-                if (dataType === 'vec4') {
-                  handleInputChange(portId, [...rgb, arr[3] !== undefined ? arr[3] : 1.0]);
-                } else {
-                  handleInputChange(portId, rgb);
-                }
-              }}
-              className="w-16 h-6 rounded cursor-pointer bg-transparent border-0 p-0"
-            />
-            {dataType === 'vec4' && (
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] text-text-muted">A</span>
+          <div className="flex flex-col gap-1 w-full ml-2">
+            <div className="flex items-center gap-2">
+              <div 
+                className="w-5 h-5 rounded-full border border-border shadow-inner shrink-0 cursor-pointer overflow-hidden relative ring-1 ring-black/20"
+                style={{ backgroundColor: colorHex }}
+              >
                 <input 
-                  type="range" 
-                  min="0" max="1" step="0.01"
-                  value={arr[3] !== undefined ? arr[3] : 1.0}
-                  onChange={(e) => handleInputChange(portId, [arr[0], arr[1], arr[2], parseFloat(e.target.value)])}
-                  className="w-12 h-1 bg-border rounded-lg appearance-none cursor-pointer"
+                  type="color" 
+                  value={colorHex}
+                  onChange={e => handleColorChange(e, 'hex')}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                 />
               </div>
+              <span className="text-[9px] font-mono opacity-50 uppercase">{colorHex}</span>
+            </div>
+            {isVec4 && (
+              <input 
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={alpha}
+                onChange={e => handleColorChange(e, 'alpha')}
+                className="w-16 h-1 mt-1 bg-primary rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:bg-text-muted [&::-webkit-slider-thumb]:rounded-full hover:[&::-webkit-slider-thumb]:bg-accent transition-all"
+                title={`Alpha: ${alpha.toFixed(2)}`}
+              />
             )}
           </div>
         );
       }
       
       return (
-        <div className="flex gap-1">
+        <div className="flex gap-1 ml-auto">
           {arr.slice(0, compCount).map((v: number, i: number) => (
             <input 
               key={i}
@@ -113,8 +126,17 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
 
   const isMaster = type === 'masterOutput';
   
-  const outerClass = "min-w-[160px] bg-secondary rounded-lg border-2 shadow-xl flex flex-col " + (selected ? 'border-accent shadow-accent/20' : 'border-border shadow-black/40');
-  const innerClass = "px-3 py-2 border-b border-border rounded-t-md font-semibold text-xs flex items-center justify-between " + (isMaster ? 'bg-accent/20 text-accent' : 'bg-primary text-text');
+  const outerClass = `min-w-[160px] bg-secondary rounded-xl border border-border shadow-xl flex flex-col transition-all duration-200 ${
+    selected 
+      ? 'ring-2 ring-accent/60 shadow-[0_0_15px_rgba(99,102,241,0.3)] border-transparent' 
+      : 'hover:border-accent/30'
+  }`;
+
+  const innerClass = `px-3 py-2 border-b border-border/50 rounded-t-xl font-semibold text-xs tracking-wide flex items-center justify-between ${
+    isMaster 
+      ? 'bg-gradient-to-r from-accent/20 to-accent/5 text-accent' 
+      : 'bg-primary/50 text-text'
+  }`;
 
   return (
     <div className={outerClass}>
@@ -132,31 +154,31 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
       </div>
 
       <div className="p-3 flex flex-col gap-3">
-        {def.inputs.map((input, idx) => (
-          <div key={input.id} className="relative flex items-center min-h-[24px]">
-            <Handle 
-              type="target" 
-              position={Position.Left} 
+        {def.inputs.map((input) => (
+          <div key={input.id} className="relative flex items-center h-6">
+            <Handle
+              type="target"
+              position={Position.Left}
               id={input.id}
-              className="!w-3 !h-3 !-left-[22px] !bg-accent !border-2 !border-secondary transition-transform hover:scale-125"
+              className={`w-3 h-3 border-2 border-secondary bg-primary hover:bg-accent hover:border-accent transition-colors`}
+              style={{ left: -18, top: '50%' }}
             />
-            <div className="flex justify-between items-center w-full gap-4">
-              <span className="text-xs text-text-muted font-medium">{input.name}</span>
-              {renderInputControl(input.id, input.type, input.defaultValue)}
+            <div className="text-[11px] font-medium text-text-muted flex items-center gap-2 w-full">
+              <span className="shrink-0">{input.name}</span>
+              {renderInputControl(input)}
             </div>
           </div>
         ))}
-      </div>
-      
-      <div className="p-3 pt-0 flex flex-col gap-3">
-        {def.outputs.map((output, idx) => (
-          <div key={output.id} className="relative flex items-center justify-end min-h-[24px]">
-            <span className="text-xs text-text-muted font-medium">{output.name}</span>
-            <Handle 
-              type="source" 
-              position={Position.Right} 
+
+        {def.outputs.map((output) => (
+          <div key={output.id} className="relative flex items-center justify-end h-6">
+            <span className="text-[11px] font-medium text-text-muted">{output.name}</span>
+            <Handle
+              type="source"
+              position={Position.Right}
               id={output.id}
-              className="!w-3 !h-3 !-right-[22px] !bg-accent !border-2 !border-secondary transition-transform hover:scale-125"
+              className={`w-3 h-3 border-2 border-secondary bg-primary hover:bg-accent hover:border-accent transition-colors`}
+              style={{ right: -18, top: '50%' }}
             />
           </div>
         ))}

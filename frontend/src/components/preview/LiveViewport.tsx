@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -69,25 +69,37 @@ export const LiveViewport = () => {
   const { compilerError } = useGraphStore();
 
   return (
-    <div className="flex flex-col w-full h-full bg-secondary border-l border-border relative">
-      <div className="flex items-center justify-between p-2 bg-primary border-b border-border">
-        <h3 className="text-sm font-semibold text-text">Live Preview</h3>
-        <div className="flex gap-2">
-          <select 
-            value={geometry}
-            onChange={(e) => setGeometry(e.target.value as any)}
-            className="bg-secondary text-xs text-text border border-border p-1 rounded"
+    <div className="h-full w-full flex flex-col relative overflow-hidden group bg-[#0d0d0f]">
+      <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-center z-10 bg-gradient-to-b from-secondary/90 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+        <h3 className="text-[10px] font-bold text-text/80 uppercase tracking-widest pointer-events-auto shadow-black drop-shadow-md">3D Preview</h3>
+        <div className="flex gap-2 pointer-events-auto">
+          <button 
+            onClick={() => setGeometry('box')}
+            className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${geometry === 'box' ? 'bg-accent/20 text-accent ring-1 ring-accent' : 'bg-primary/50 text-text-muted hover:text-text hover:bg-primary'}`}
+            title="Cube"
           >
-            <option value="plane">Plane</option>
-            <option value="box">Box</option>
-            <option value="sphere">Sphere</option>
-          </select>
+            <div className="w-2.5 h-2.5 border-2 border-current rounded-sm"></div>
+          </button>
+          <button 
+            onClick={() => setGeometry('sphere')}
+            className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${geometry === 'sphere' ? 'bg-accent/20 text-accent ring-1 ring-accent' : 'bg-primary/50 text-text-muted hover:text-text hover:bg-primary'}`}
+            title="Sphere"
+          >
+            <div className="w-3 h-3 border-2 border-current rounded-full"></div>
+          </button>
+          <button 
+            onClick={() => setGeometry('plane')}
+            className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${geometry === 'plane' ? 'bg-accent/20 text-accent ring-1 ring-accent' : 'bg-primary/50 text-text-muted hover:text-text hover:bg-primary'}`}
+            title="Plane"
+          >
+            <div className="w-3 h-1 bg-current rounded-sm"></div>
+          </button>
         </div>
       </div>
       
       <div className="flex-1 relative">
         <Canvas camera={{ position: [0, 0, 4] }}>
-          <color attach="background" args={['#1e1e24']} />
+          <color attach="background" args={['#0d0d0f']} />
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
           <ShaderMesh geometry={geometry} />
@@ -96,8 +108,9 @@ export const LiveViewport = () => {
       </div>
 
       {compilerError && (
-        <div className="absolute bottom-0 left-0 right-0 bg-red-900/80 text-red-100 p-2 text-xs font-mono max-h-32 overflow-y-auto whitespace-pre-wrap border-t border-red-500">
-          {compilerError}
+        <div className="absolute bottom-4 left-4 right-4 text-red-400 text-center p-4 bg-red-950/80 rounded-xl border border-red-500/30 backdrop-blur-md shadow-2xl max-h-32 overflow-y-auto custom-scrollbar">
+          <p className="font-semibold text-[10px] uppercase tracking-wider mb-2">Compilation Error</p>
+          <pre className="text-[10px] font-mono text-left whitespace-pre-wrap">{compilerError}</pre>
         </div>
       )}
     </div>

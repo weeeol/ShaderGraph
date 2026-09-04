@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { transpileGraphToGLSL, NodeRegistry } from './compiler';
-import { GraphNode, GraphEdge } from './types';
+import { transpileGraphToGLSL } from './compiler';
+import type { GraphNode, GraphEdge } from './types';
 
 import { NODE_REGISTRY as mockRegistry } from '../nodes/registry';
 
