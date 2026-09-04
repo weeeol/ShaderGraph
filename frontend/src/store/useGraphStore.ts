@@ -25,6 +25,7 @@ const initialNodes: Node[] = [
     type: 'masterOutput',
     position: { x: 400, y: 200 },
     data: {},
+    deletable: false,
   }
 ];
 
@@ -40,7 +41,11 @@ interface GraphStore {
   onConnect: OnConnect;
   compile: () => void;
   updateNodeData: (nodeId: string, portId: string, value: any) => void;
+  addNode: (type: string, position: { x: number, y: number }) => void;
+  deleteNode: (nodeId: string) => void;
 }
+
+let nodeIdCounter = 1;
 
 export const useGraphStore = create<GraphStore>((set, get) => ({
   nodes: initialNodes,
@@ -74,6 +79,27 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
       nodes: get().nodes.map(n => 
         n.id === nodeId ? { ...n, data: { ...n.data, [portId]: value } } : n
       )
+    });
+    get().compile();
+  },
+
+  addNode: (type: string, position: { x: number, y: number }) => {
+    const newNode: Node = {
+      id: "node_" + (nodeIdCounter++) + "_" + Date.now(),
+      type,
+      position,
+      data: {},
+    };
+    set({ nodes: [...get().nodes, newNode] });
+    get().compile();
+  },
+
+  deleteNode: (nodeId: string) => {
+    if (nodeId === 'master-node') return; // Cannot delete master node
+    set({
+      nodes: get().nodes.filter(n => n.id !== nodeId),
+      // Also remove any edges connected to this node
+      edges: get().edges.filter(e => e.source !== nodeId && e.target !== nodeId)
     });
     get().compile();
   },

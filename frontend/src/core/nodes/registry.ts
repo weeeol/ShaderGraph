@@ -85,10 +85,10 @@ export const NODE_REGISTRY: NodeRegistry = {
     type: 'add',
     name: 'Add',
     inputs: [
-      { id: 'a', name: 'A', type: 'float', defaultValue: 0.0 },
-      { id: 'b', name: 'B', type: 'float', defaultValue: 0.0 }
+      { id: 'a', name: 'A', type: 'vec4', defaultValue: [0, 0, 0, 0] },
+      { id: 'b', name: 'B', type: 'vec4', defaultValue: [0, 0, 0, 0] }
     ],
-    outputs: [{ id: 'out', name: 'Out', type: 'float' }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
     glslTemplate: "{{out_out}} = {{in_a}} + {{in_b}};"
   },
   subtract: {
@@ -96,10 +96,10 @@ export const NODE_REGISTRY: NodeRegistry = {
     type: 'subtract',
     name: 'Subtract',
     inputs: [
-      { id: 'a', name: 'A', type: 'float', defaultValue: 0.0 },
-      { id: 'b', name: 'B', type: 'float', defaultValue: 0.0 }
+      { id: 'a', name: 'A', type: 'vec4', defaultValue: [0, 0, 0, 0] },
+      { id: 'b', name: 'B', type: 'vec4', defaultValue: [0, 0, 0, 0] }
     ],
-    outputs: [{ id: 'out', name: 'Out', type: 'float' }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
     glslTemplate: "{{out_out}} = {{in_a}} - {{in_b}};"
   },
   multiply: {
@@ -107,10 +107,10 @@ export const NODE_REGISTRY: NodeRegistry = {
     type: 'multiply',
     name: 'Multiply',
     inputs: [
-      { id: 'a', name: 'A', type: 'float', defaultValue: 1.0 },
-      { id: 'b', name: 'B', type: 'float', defaultValue: 1.0 }
+      { id: 'a', name: 'A', type: 'vec4', defaultValue: [1, 1, 1, 1] },
+      { id: 'b', name: 'B', type: 'vec4', defaultValue: [1, 1, 1, 1] }
     ],
-    outputs: [{ id: 'out', name: 'Out', type: 'float' }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
     glslTemplate: "{{out_out}} = {{in_a}} * {{in_b}};"
   },
   divide: {
@@ -118,22 +118,22 @@ export const NODE_REGISTRY: NodeRegistry = {
     type: 'divide',
     name: 'Divide',
     inputs: [
-      { id: 'a', name: 'A', type: 'float', defaultValue: 1.0 },
-      { id: 'b', name: 'B', type: 'float', defaultValue: 1.0 }
+      { id: 'a', name: 'A', type: 'vec4', defaultValue: [1, 1, 1, 1] },
+      { id: 'b', name: 'B', type: 'vec4', defaultValue: [1, 1, 1, 1] }
     ],
-    outputs: [{ id: 'out', name: 'Out', type: 'float' }],
-    glslTemplate: "{{out_out}} = {{in_a}} / ({{in_b}} + 0.000001);"
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
+    glslTemplate: "{{out_out}} = {{in_a}} / {{in_b}};"
   },
   mix: {
     id: 'mix',
     type: 'mix',
     name: 'Mix (Lerp)',
     inputs: [
-      { id: 'a', name: 'A', type: 'float', defaultValue: 0.0 },
-      { id: 'b', name: 'B', type: 'float', defaultValue: 1.0 },
-      { id: 't', name: 'T', type: 'float', defaultValue: 0.5 }
+      { id: 'a', name: 'A', type: 'vec4', defaultValue: [0, 0, 0, 0] },
+      { id: 'b', name: 'B', type: 'vec4', defaultValue: [1, 1, 1, 1] },
+      { id: 't', name: 'T', type: 'vec4', defaultValue: [0.5, 0.5, 0.5, 0.5] }
     ],
-    outputs: [{ id: 'out', name: 'Out', type: 'float' }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
     glslTemplate: "{{out_out}} = mix({{in_a}}, {{in_b}}, {{in_t}});"
   },
   clamp: {
@@ -141,11 +141,11 @@ export const NODE_REGISTRY: NodeRegistry = {
     type: 'clamp',
     name: 'Clamp',
     inputs: [
-      { id: 'val', name: 'Val', type: 'float', defaultValue: 0.0 },
-      { id: 'min', name: 'Min', type: 'float', defaultValue: 0.0 },
-      { id: 'max', name: 'Max', type: 'float', defaultValue: 1.0 }
+      { id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] },
+      { id: 'min', name: 'Min', type: 'vec4', defaultValue: [0, 0, 0, 0] },
+      { id: 'max', name: 'Max', type: 'vec4', defaultValue: [1, 1, 1, 1] }
     ],
-    outputs: [{ id: 'out', name: 'Out', type: 'float' }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
     glslTemplate: "{{out_out}} = clamp({{in_val}}, {{in_min}}, {{in_max}});"
   },
   step: {
@@ -153,10 +153,10 @@ export const NODE_REGISTRY: NodeRegistry = {
     type: 'step',
     name: 'Step',
     inputs: [
-      { id: 'edge', name: 'Edge', type: 'float', defaultValue: 0.5 },
-      { id: 'val', name: 'Val', type: 'float', defaultValue: 0.0 }
+      { id: 'edge', name: 'Edge', type: 'vec4', defaultValue: [0.5, 0.5, 0.5, 0.5] },
+      { id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }
     ],
-    outputs: [{ id: 'out', name: 'Out', type: 'float' }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
     glslTemplate: "{{out_out}} = step({{in_edge}}, {{in_val}});"
   },
   smoothstep: {
@@ -164,27 +164,27 @@ export const NODE_REGISTRY: NodeRegistry = {
     type: 'smoothstep',
     name: 'Smoothstep',
     inputs: [
-      { id: 'edge0', name: 'Edge0', type: 'float', defaultValue: 0.0 },
-      { id: 'edge1', name: 'Edge1', type: 'float', defaultValue: 1.0 },
-      { id: 'val', name: 'Val', type: 'float', defaultValue: 0.5 }
+      { id: 'edge0', name: 'Edge0', type: 'vec4', defaultValue: [0, 0, 0, 0] },
+      { id: 'edge1', name: 'Edge1', type: 'vec4', defaultValue: [1, 1, 1, 1] },
+      { id: 'val', name: 'Val', type: 'vec4', defaultValue: [0.5, 0.5, 0.5, 0.5] }
     ],
-    outputs: [{ id: 'out', name: 'Out', type: 'float' }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
     glslTemplate: "{{out_out}} = smoothstep({{in_edge0}}, {{in_edge1}}, {{in_val}});"
   },
   sin: {
     id: 'sin',
     type: 'sin',
     name: 'Sine',
-    inputs: [{ id: 'val', name: 'Val', type: 'float', defaultValue: 0.0 }],
-    outputs: [{ id: 'out', name: 'Out', type: 'float' }],
+    inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
     glslTemplate: "{{out_out}} = sin({{in_val}});"
   },
   cos: {
     id: 'cos',
     type: 'cos',
     name: 'Cosine',
-    inputs: [{ id: 'val', name: 'Val', type: 'float', defaultValue: 0.0 }],
-    outputs: [{ id: 'out', name: 'Out', type: 'float' }],
+    inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
     glslTemplate: "{{out_out}} = cos({{in_val}});"
   },
   power: {
@@ -192,11 +192,118 @@ export const NODE_REGISTRY: NodeRegistry = {
     type: 'power',
     name: 'Power',
     inputs: [
-      { id: 'base', name: 'Base', type: 'float', defaultValue: 1.0 },
-      { id: 'exp', name: 'Exp', type: 'float', defaultValue: 2.0 }
+      { id: 'base', name: 'Base', type: 'vec4', defaultValue: [1, 1, 1, 1] },
+      { id: 'exp', name: 'Exp', type: 'vec4', defaultValue: [2, 2, 2, 2] }
+    ],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
+    glslTemplate: "{{out_out}} = pow(max({{in_base}}, vec4(0.0)), {{in_exp}});"
+  },
+  dot: {
+    id: 'dot',
+    type: 'dot',
+    name: 'Dot Product',
+    inputs: [
+      { id: 'a', name: 'A', type: 'vec4', defaultValue: [0, 0, 0, 0] },
+      { id: 'b', name: 'B', type: 'vec4', defaultValue: [0, 0, 0, 0] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'float' }],
-    glslTemplate: "{{out_out}} = pow(max({{in_base}}, 0.0), {{in_exp}});"
+    glslTemplate: "{{out_out}} = dot({{in_a}}, {{in_b}});"
+  },
+  cross: {
+    id: 'cross',
+    type: 'cross',
+    name: 'Cross Product',
+    inputs: [
+      { id: 'a', name: 'A', type: 'vec3', defaultValue: [0, 0, 0] },
+      { id: 'b', name: 'B', type: 'vec3', defaultValue: [0, 0, 0] }
+    ],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec3' }],
+    glslTemplate: "{{out_out}} = cross({{in_a}}, {{in_b}});"
+  },
+  normalize: {
+    id: 'normalize',
+    type: 'normalize',
+    name: 'Normalize',
+    inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
+    glslTemplate: "{{out_out}} = normalize({{in_val}});"
+  },
+  length: {
+    id: 'length',
+    type: 'length',
+    name: 'Length',
+    inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
+    outputs: [{ id: 'out', name: 'Out', type: 'float' }],
+    glslTemplate: "{{out_out}} = length({{in_val}});"
+  },
+  fract: {
+    id: 'fract',
+    type: 'fract',
+    name: 'Fract',
+    inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
+    glslTemplate: "{{out_out}} = fract({{in_val}});"
+  },
+  abs: {
+    id: 'abs',
+    type: 'abs',
+    name: 'Absolute',
+    inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
+    glslTemplate: "{{out_out}} = abs({{in_val}});"
+  },
+  min: {
+    id: 'min',
+    type: 'min',
+    name: 'Minimum',
+    inputs: [
+      { id: 'a', name: 'A', type: 'vec4', defaultValue: [0, 0, 0, 0] },
+      { id: 'b', name: 'B', type: 'vec4', defaultValue: [0, 0, 0, 0] }
+    ],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
+    glslTemplate: "{{out_out}} = min({{in_a}}, {{in_b}});"
+  },
+  max: {
+    id: 'max',
+    type: 'max',
+    name: 'Maximum',
+    inputs: [
+      { id: 'a', name: 'A', type: 'vec4', defaultValue: [0, 0, 0, 0] },
+      { id: 'b', name: 'B', type: 'vec4', defaultValue: [0, 0, 0, 0] }
+    ],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
+    glslTemplate: "{{out_out}} = max({{in_a}}, {{in_b}});"
+  },
+  split: {
+    id: 'split',
+    type: 'split',
+    name: 'Split',
+    inputs: [{ id: 'val', name: 'In', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
+    outputs: [
+      { id: 'r', name: 'R', type: 'float' },
+      { id: 'g', name: 'G', type: 'float' },
+      { id: 'b', name: 'B', type: 'float' },
+      { id: 'a', name: 'A', type: 'float' }
+    ],
+    glslTemplate: `
+      {{out_r}} = {{in_val}}.r;
+      {{out_g}} = {{in_val}}.g;
+      {{out_b}} = {{in_val}}.b;
+      {{out_a}} = {{in_val}}.a;
+    `
+  },
+  combine: {
+    id: 'combine',
+    type: 'combine',
+    name: 'Combine',
+    inputs: [
+      { id: 'r', name: 'R', type: 'float', defaultValue: 0.0 },
+      { id: 'g', name: 'G', type: 'float', defaultValue: 0.0 },
+      { id: 'b', name: 'B', type: 'float', defaultValue: 0.0 },
+      { id: 'a', name: 'A', type: 'float', defaultValue: 1.0 }
+    ],
+    outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
+    glslTemplate: "{{out_out}} = vec4({{in_r}}, {{in_g}}, {{in_b}}, {{in_a}});"
   },
 
   // --- PROCEDURAL / NOISE ---
