@@ -31,8 +31,11 @@ const STORAGE_KEY = 'shadergraph_saved_projects';
 
 const getStoredGraphs = (): SavedGraphItem[] => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (typeof localStorage !== 'undefined' && typeof localStorage.getItem === 'function') {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }
+    return [];
   } catch (e) {
     console.error('Error loading saved graphs from localStorage', e);
     return [];
@@ -41,7 +44,9 @@ const getStoredGraphs = (): SavedGraphItem[] => {
 
 const setStoredGraphs = (graphs: SavedGraphItem[]) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(graphs));
+    if (typeof localStorage !== 'undefined' && typeof localStorage.setItem === 'function') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(graphs));
+    }
   } catch (e) {
     console.error('Error saving graphs to localStorage', e);
   }
@@ -84,6 +89,12 @@ interface GraphStore {
   theme: ThemeMode;
   glslCode: string;
   compilerError: string | null;
+  past: Array<{ nodes: Node[]; edges: Edge[] }>;
+  future: Array<{ nodes: Node[]; edges: Edge[] }>;
+  pushHistory: () => void;
+  undo: () => void;
+  redo: () => void;
+  duplicateSelectedNodes: () => void;
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
@@ -104,6 +115,8 @@ let nodeIdCounter = 1;
 export const useGraphStore = create<GraphStore>((set, get) => ({
   nodes: initialNodes,
   edges: initialEdges,
+  past: [],
+  future: [],
   currentGraphName: 'Untitled Graph',
   savedGraphs: getStoredGraphs(),
   theme: getInitialTheme(),
@@ -121,7 +134,106 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
     }
   },
   
+  pushHistory: () => {
+    const { nodes, edges, past } = get();
+    const current = {
+      nodes: JSON.parse(JSON.stringify(nodes)),
+      edges: JSON.parse(JSON.stringify(edges)),
+    };
+    set({
+      past: [...past, current].slice(-30),
+      future: [],
+    });
+  },
+
+  undo: () => {
+    const { past, future, nodes, edges } = get();
+    if (past.length === 0) return;
+    const previous = past[past.length - 1];
+    const newPast = past.slice(0, past.length - 1);
+    const current = {
+      nodes: JSON.parse(JSON.stringify(nodes)),
+      edges: JSON.parse(JSON.stringify(edges)),
+    };
+    set({
+      past: newPast,
+      future: [current, ...future].slice(0, 30),
+      nodes: previous.nodes,
+      edges: previous.edges,
+    });
+    get().compile();
+  },
+
+  redo: () => {
+    const { past, future, nodes, edges } = get();
+    if (future.length === 0) return;
+    const next = future[0];
+    const newFuture = future.slice(1);
+    const current = {
+      nodes: JSON.parse(JSON.stringify(nodes)),
+      edges: JSON.parse(JSON.stringify(edges)),
+    };
+    set({
+      past: [...past, current].slice(-30),
+      future: newFuture,
+      nodes: next.nodes,
+      edges: next.edges,
+    });
+    get().compile();
+  },
+
+  duplicateSelectedNodes: () => {
+    const { nodes, edges } = get();
+    const selectedNodes = nodes.filter(n => n.selected && n.type !== 'masterOutput');
+    if (selectedNodes.length === 0) return;
+
+    get().pushHistory();
+
+    const idMap: Record<string, string> = {};
+    const newNodes: Node[] = selectedNodes.map(node => {
+      const newId = "node_" + (nodeIdCounter++) + "_" + Date.now();
+      idMap[node.id] = newId;
+      return {
+        ...node,
+        id: newId,
+        position: {
+          x: node.position.x + 40,
+          y: node.position.y + 40,
+        },
+        selected: true,
+        data: JSON.parse(JSON.stringify(node.data || {})),
+      };
+    });
+
+    const updatedOldNodes = nodes.map(n => ({
+      ...n,
+      selected: false,
+    }));
+
+    const newEdges: Edge[] = [];
+    edges.forEach(edge => {
+      if (idMap[edge.source] && idMap[edge.target]) {
+        newEdges.push({
+          ...edge,
+          id: `xy-edge__${idMap[edge.source]}${edge.sourceHandle || ''}-${idMap[edge.target]}${edge.targetHandle || ''}_${Date.now()}`,
+          source: idMap[edge.source],
+          target: idMap[edge.target],
+        });
+      }
+    });
+
+    set({
+      nodes: [...updatedOldNodes, ...newNodes],
+      edges: [...edges, ...newEdges],
+    });
+    get().compile();
+  },
+
   onNodesChange: (changes: NodeChange[]) => {
+    const hasRemoval = changes.some(c => c.type === 'remove');
+    if (hasRemoval) {
+      get().pushHistory();
+    }
     set({
       nodes: applyNodeChanges(changes, get().nodes),
     });
@@ -129,6 +241,10 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
   },
   
   onEdgesChange: (changes: EdgeChange[]) => {
+    const hasRemoval = changes.some(c => c.type === 'remove');
+    if (hasRemoval) {
+      get().pushHistory();
+    }
     set({
       edges: applyEdgeChanges(changes, get().edges),
     });
@@ -136,6 +252,7 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
   },
   
   onConnect: (connection: Connection) => {
+    get().pushHistory();
     set({
       edges: addEdge(connection, get().edges),
     });
@@ -152,6 +269,7 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
   },
 
   addNode: (type: string, position: { x: number, y: number }) => {
+    get().pushHistory();
     const newNode: Node = {
       id: "node_" + (nodeIdCounter++) + "_" + Date.now(),
       type,
@@ -164,6 +282,7 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
 
   deleteNode: (nodeId: string) => {
     if (nodeId === 'master-node') return; // Cannot delete master node
+    get().pushHistory();
     set({
       nodes: get().nodes.filter(n => n.id !== nodeId),
       edges: get().edges.filter(e => e.source !== nodeId && e.target !== nodeId)
@@ -175,6 +294,8 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
     set({
       nodes,
       edges,
+      past: [],
+      future: [],
       currentGraphName: name,
     });
     get().compile();
@@ -192,6 +313,8 @@ export const useGraphStore = create<GraphStore>((set, get) => ({
         }
       ],
       edges: [],
+      past: [],
+      future: [],
       currentGraphName: 'Untitled Graph',
     });
     get().compile();

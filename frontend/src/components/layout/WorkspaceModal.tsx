@@ -19,9 +19,10 @@ import { SAMPLE_GRAPHS, type SampleGraph } from '../../core/samples/samples';
 interface WorkspaceModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onNewBlankGraph?: () => void;
 }
 
-export const WorkspaceModal = ({ isOpen, onClose }: WorkspaceModalProps) => {
+export const WorkspaceModal = ({ isOpen, onClose, onNewBlankGraph }: WorkspaceModalProps) => {
   const { 
     nodes, 
     edges, 
@@ -62,6 +63,9 @@ export const WorkspaceModal = ({ isOpen, onClose }: WorkspaceModalProps) => {
   const handleNewGraph = () => {
     newGraph();
     onClose();
+    if (onNewBlankGraph) {
+      onNewBlankGraph();
+    }
   };
 
   const handleLoadSample = (sample: SampleGraph) => {
@@ -266,6 +270,10 @@ export const WorkspaceModal = ({ isOpen, onClose }: WorkspaceModalProps) => {
               <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Active Graph</div>
               <div className="text-zinc-200 font-medium truncate mt-0.5">{currentGraphName}</div>
               <div className="text-[11px] text-zinc-400 mt-0.5 font-mono">{nodes.length} nodes • {edges.length} wires</div>
+            </div>
+
+            <div className="pt-1 text-[11px] font-mono text-zinc-500 text-center select-none">
+              Created by <span className="text-zinc-300 font-medium">Veol Steve</span>
             </div>
           </div>
         </div>

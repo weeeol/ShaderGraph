@@ -1,6 +1,19 @@
 import { useGraphStore } from '../../store/useGraphStore';
 import { ShaderRenderer } from '../../core/gl/ShaderRenderer';
-import { Play, AlertTriangle, HelpCircle, FolderOpen, Download, PanelLeft, PanelRight, Sun, Moon } from 'lucide-react';
+import { 
+  Play, 
+  AlertTriangle, 
+  HelpCircle, 
+  FolderOpen, 
+  Download, 
+  PanelLeft, 
+  PanelRight, 
+  Sun, 
+  Moon, 
+  Undo2, 
+  Redo2, 
+  Plus 
+} from 'lucide-react';
 
 interface HeaderProps {
   isSidebarOpen: boolean;
@@ -9,6 +22,7 @@ interface HeaderProps {
   toggleDock: () => void;
   onOpenIntro?: () => void;
   onOpenWorkspace?: () => void;
+  onOpenQuickSearch?: () => void;
 }
 
 export const Header = ({ 
@@ -17,9 +31,21 @@ export const Header = ({
   toggleSidebar, 
   toggleDock, 
   onOpenIntro, 
-  onOpenWorkspace 
+  onOpenWorkspace,
+  onOpenQuickSearch 
 }: HeaderProps) => {
-  const { compilerError, compile, glslCode, currentGraphName, theme, toggleTheme } = useGraphStore();
+  const { 
+    compilerError, 
+    compile, 
+    glslCode, 
+    currentGraphName, 
+    theme, 
+    toggleTheme, 
+    past, 
+    future, 
+    undo, 
+    redo 
+  } = useGraphStore();
 
   const handleExport = () => {
     if (!glslCode || compilerError) {
@@ -81,7 +107,44 @@ export const Header = ({
       </div>
 
       {/* Right Controls & Actions */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
+        {/* Undo / Redo */}
+        <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-md p-0.5">
+          <button
+            onClick={undo}
+            disabled={past.length === 0}
+            className="p-1.5 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-400 disabled:cursor-not-allowed"
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo2 size={13} />
+          </button>
+          <button
+            onClick={redo}
+            disabled={future.length === 0}
+            className="p-1.5 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-zinc-400 disabled:cursor-not-allowed"
+            title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
+          >
+            <Redo2 size={13} />
+          </button>
+        </div>
+
+        {/* Quick Add Node */}
+        {onOpenQuickSearch && (
+          <button
+            onClick={onOpenQuickSearch}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 transition-colors"
+            title="Search and Add Node (Tab or Right-Click)"
+          >
+            <Plus size={13} className="text-zinc-400" />
+            <span>Add Node</span>
+            <kbd className="hidden sm:inline text-[9px] font-mono px-1 py-0.2 rounded bg-zinc-950 text-zinc-500 border border-zinc-800">
+              Tab
+            </kbd>
+          </button>
+        )}
+
+        <div className="w-px h-5 bg-zinc-800 mx-0.5" />
+
         {/* Compiler Status (shown only on error) */}
         {compilerError && (
           <div className="flex items-center gap-1.5 text-red-400 bg-red-950/50 px-2.5 py-1 rounded border border-red-800/60 text-xs font-mono">

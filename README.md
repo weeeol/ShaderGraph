@@ -2,6 +2,8 @@
 
 A fast, web-based visual node editor for authoring WebGL2 shaders in real time.
 
+*Created by **Veol Steve***
+
 Construct complex GLSL fragment shaders through a node-based DAG (Directed Acyclic Graph) workflow with automatic type conversion, instant 3D viewport previews, dynamic GLSL code generation, texture baking, and workspace management.
 
 ---
@@ -15,9 +17,11 @@ Construct complex GLSL fragment shaders through a node-based DAG (Directed Acycl
 - **Precision Inline Controls**: Sliders, number inputs, and hex color pickers are isolated with strict event propagation rules so tweaking parameters never accidentally drags nodes.
 
 ### Real-Time 3D Viewport
-- **Live Three.js / WebGL2 Preview**: Watch changes reflect instantaneously on interactive 3D meshes (Cube, Sphere, Plane).
-- **Orbit Controls & Auto-Rotation**: Inspect shader reactions across different angles and curvature.
-- **Time-Animated Shaders**: Dedicated `Time` node supplies elapsed seconds for fluid procedural effects, sine flows, and animated patterns.
+- **Extended 3D Mesh Library**: Preview shaders live across 5 geometry types: **Cube**, **Sphere**, **Plane**, **Torus Knot** (organic curvature), and **Cylinder**.
+- **Wireframe Overlay**: Toggle a synchronized wireframe overlay to inspect surface topology, edge flow, and UV alignment without obscuring your shader.
+- **Custom Viewport Backgrounds**: Cycle between **Studio** (solid dark/light), **Gradient** (vignette depth), and **Checkerboard** (transparency grid for alpha verification).
+- **Collapsible Performance HUD**: Floating stats monitor reporting real-time **FPS**, **Draw Calls**, **Triangles**, and elapsed **`u_time`**.
+- **Orbit Controls & Interaction**: Full rotational orbit, pan, and zoom powered by Three.js & `@react-three/fiber`.
 
 ### Workspace Manager & Curated Presets
 - **Interactive Workspace Modal**: Switch graphs seamlessly, start fresh blank canvases, or load saved graphs anytime.
@@ -137,10 +141,20 @@ ShaderGraph/
 
 | Shortcut | Action |
 |---|---|
+| `Right-Click` / `Tab` | Open Quick Node Search at cursor |
+| `Ctrl + Z` | Undo last action |
+| `Ctrl + Y` / `Ctrl + Shift + Z` | Redo action |
+| `Ctrl + D` | Duplicate selected nodes with values |
 | `Delete` / `Backspace` | Remove selected nodes or connections |
 | `Space + Drag` | Pan canvas |
 | `Scroll Wheel` | Zoom in / out |
-| `Escape` | Close active modals (Workspace Manager, Quick Guide) |
+| `Escape` | Close active modals (Quick Search, Workspace Manager, Reference) |
+
+---
+
+## Author
+
+Designed and developed by **Veol Steve**.
 
 ---
 
