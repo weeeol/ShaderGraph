@@ -4,13 +4,40 @@ import type { NodeProps } from '@xyflow/react';
 import { NODE_REGISTRY } from '../../core/nodes/registry';
 import { useGraphStore } from '../../store/useGraphStore';
 
+// Data type colors for industry standard socket representation
+const TYPE_COLORS: Record<string, string> = {
+  float: '#a1a1aa',  // Grey (scalar)
+  vec2: '#38bdf8',   // Cyan / Sky
+  vec3: '#facc15',   // Yellow / Amber
+  vec4: '#c084fc',   // Purple / Violet
+  sampler2D: '#f87171' // Red
+};
+
+const getCategoryMeta = (type: string) => {
+  if (type === 'masterOutput') {
+    return { tag: 'OUTPUT', dot: 'bg-amber-400', headerBorder: 'border-amber-500/50' };
+  }
+  if (['uv', 'time', 'resolution', 'mouse', 'floatConstant', 'colorConstant'].includes(type)) {
+    return { tag: 'IN', dot: 'bg-emerald-400', headerBorder: 'border-emerald-500/30' };
+  }
+  if (['simplex2d', 'voronoi', 'checkerboard'].includes(type)) {
+    return { tag: 'NOISE', dot: 'bg-purple-400', headerBorder: 'border-purple-500/30' };
+  }
+  if (['split', 'combine'].includes(type)) {
+    return { tag: 'CHNL', dot: 'bg-blue-400', headerBorder: 'border-blue-500/30' };
+  }
+  if (['tileAndOffset', 'polarCoords', 'rotateUv', 'invert', 'contrast'].includes(type)) {
+    return { tag: 'UV', dot: 'bg-teal-400', headerBorder: 'border-teal-500/30' };
+  }
+  return { tag: 'MATH', dot: 'bg-cyan-400', headerBorder: 'border-cyan-500/30' };
+};
 
 // Helper to convert normalized RGB array to Hex
 const rgbToHex = (arr: number[]) => {
   const r = Math.round(Math.max(0, Math.min(1, arr[0] || 0)) * 255).toString(16).padStart(2, '0');
   const g = Math.round(Math.max(0, Math.min(1, arr[1] || 0)) * 255).toString(16).padStart(2, '0');
   const b = Math.round(Math.max(0, Math.min(1, arr[2] || 0)) * 255).toString(16).padStart(2, '0');
-  return "#" + r + g + b;
+  return '#' + r + g + b;
 };
 
 // Helper to convert Hex string to normalized RGB array
@@ -27,8 +54,15 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
   const def = NODE_REGISTRY[type];
 
   if (!def) {
-    return <div className="p-2 bg-red-900 border border-red-500 rounded text-xs text-white">Unknown Type: {type}</div>;
+    return (
+      <div className="px-3 py-2 bg-red-950 border border-red-800 rounded-lg text-xs text-red-200 font-mono">
+        Unknown Node: {type}
+      </div>
+    );
   }
+
+  const isMaster = type === 'masterOutput';
+  const category = getCategoryMeta(type);
 
   const handleInputChange = (portId: string, val: any) => {
     updateNodeData(id, portId, val);
@@ -46,13 +80,15 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
           step="0.1"
           value={currentValue}
           onChange={(e) => handleInputChange(portId, parseFloat(e.target.value) || 0)}
-          className="w-12 bg-primary/50 border border-border/50 text-text text-[10px] px-1 py-0.5 rounded focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent ml-auto shadow-inner"
+          onMouseDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="w-16 bg-zinc-950 border border-zinc-800 text-zinc-200 font-mono text-xs px-2 py-0.5 rounded focus:border-zinc-500 outline-none ml-auto text-right nodrag nopan"
         />
       );
     }
     
     if (dataType === 'vec2' || dataType === 'vec3' || dataType === 'vec4') {
-      const isColor = portId.toLowerCase().includes('color') || portId.toLowerCase().includes('albedo');
+      const isColor = portId.toLowerCase().includes('color') || portId.toLowerCase().includes('albedo') || input.id === 'val';
       const compCount = dataType === 'vec2' ? 2 : dataType === 'vec3' ? 3 : 4;
       const arr = Array.isArray(currentValue) ? currentValue : Array(compCount).fill(0);
       
@@ -61,8 +97,8 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
         const isVec4 = dataType === 'vec4';
         const alpha = arr[3] !== undefined ? arr[3] : 1.0;
         
-        const handleColorChange = (e: any, type: 'hex' | 'alpha') => {
-          if (type === 'hex') {
+        const handleColorChange = (e: any, mode: 'hex' | 'alpha') => {
+          if (mode === 'hex') {
             const rgb = hexToRgb(e.target.value);
             handleInputChange(portId, isVec4 ? [...rgb, alpha] : rgb);
           } else {
@@ -71,21 +107,23 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
         };
 
         return (
-          <div className="flex flex-col gap-1 w-full ml-2">
-            <div className="flex items-center gap-2">
-              <div 
-                className="w-5 h-5 rounded-full border border-border shadow-inner shrink-0 cursor-pointer overflow-hidden relative ring-1 ring-black/20"
-                style={{ backgroundColor: colorHex }}
-              >
-                <input 
-                  type="color" 
-                  value={colorHex}
-                  onChange={e => handleColorChange(e, 'hex')}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                />
-              </div>
-              <span className="text-[9px] font-mono opacity-50 uppercase">{colorHex}</span>
+          <div 
+            className="flex items-center gap-2 ml-auto nodrag nopan"
+            onMouseDown={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
+            <div 
+              className="w-5 h-5 rounded border border-zinc-700 shrink-0 cursor-pointer overflow-hidden relative shadow-sm nodrag nopan"
+              style={{ backgroundColor: colorHex }}
+            >
+              <input 
+                type="color" 
+                value={colorHex}
+                onChange={e => handleColorChange(e, 'hex')}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full nodrag nopan"
+              />
             </div>
+            <span className="text-xs font-mono text-zinc-400 uppercase">{colorHex}</span>
             {isVec4 && (
               <input 
                 type="range"
@@ -94,7 +132,9 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
                 step="0.01"
                 value={alpha}
                 onChange={e => handleColorChange(e, 'alpha')}
-                className="w-16 h-1 mt-1 bg-primary rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:bg-text-muted [&::-webkit-slider-thumb]:rounded-full hover:[&::-webkit-slider-thumb]:bg-accent transition-all"
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="w-14 h-1.5 bg-zinc-800 rounded-full appearance-none cursor-pointer accent-zinc-300 nodrag nopan"
                 title={`Alpha: ${alpha.toFixed(2)}`}
               />
             )}
@@ -103,7 +143,11 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
       }
       
       return (
-        <div className="flex gap-1 ml-auto">
+        <div 
+          className="flex gap-1 ml-auto nodrag nopan"
+          onMouseDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           {arr.slice(0, compCount).map((v: number, i: number) => (
             <input 
               key={i}
@@ -115,7 +159,9 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
                 newArr[i] = parseFloat(e.target.value) || 0;
                 handleInputChange(portId, newArr);
               }}
-              className="w-10 bg-primary border border-border text-xs text-text p-1 rounded nodrag text-center focus:border-accent outline-none transition-colors"
+              onMouseDown={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+              className="w-11 bg-zinc-950 border border-zinc-800 text-xs font-mono text-zinc-200 px-1 py-0.5 rounded text-center focus:border-zinc-500 outline-none nodrag nopan"
             />
           ))}
         </div>
@@ -124,64 +170,87 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
     return null;
   };
 
-  const isMaster = type === 'masterOutput';
-  
-  const outerClass = `min-w-[160px] bg-secondary rounded-xl border border-border shadow-xl flex flex-col transition-all duration-200 ${
-    selected 
-      ? 'ring-2 ring-accent/60 shadow-[0_0_15px_rgba(99,102,241,0.3)] border-transparent' 
-      : 'hover:border-accent/30'
-  }`;
-
-  const innerClass = `px-3 py-2 border-b border-border/50 rounded-t-xl font-semibold text-xs tracking-wide flex items-center justify-between ${
-    isMaster 
-      ? 'bg-gradient-to-r from-accent/20 to-accent/5 text-accent' 
-      : 'bg-primary/50 text-text'
-  }`;
-
   return (
-    <div className={outerClass}>
-      <div className={innerClass}>
-        <span>{def.name}</span>
-        {!isMaster && (
-          <button 
-            onClick={() => deleteNode(id)}
-            className="w-4 h-4 rounded-full flex items-center justify-center text-text-muted hover:text-red-400 hover:bg-red-400/10 transition-colors"
-            title="Delete Node"
-          >
-            ×
-          </button>
-        )}
+    <div 
+      className={`min-w-[200px] bg-zinc-900 border rounded-lg shadow-xl flex flex-col transition-all duration-150 ${
+        selected 
+          ? 'border-zinc-300 ring-1 ring-zinc-300/40 shadow-2xl' 
+          : 'border-zinc-800 hover:border-zinc-700'
+      }`}
+    >
+      {/* Node Header */}
+      <div className={`px-3.5 py-2 bg-zinc-950 border-b flex items-center justify-between rounded-t-lg ${category.headerBorder}`}>
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${category.dot}`} />
+          <span className="font-semibold text-xs text-zinc-100 tracking-wide">{def.name}</span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <span className="text-[9px] font-mono font-semibold px-1 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-500">
+            {category.tag}
+          </span>
+          {!isMaster && (
+            <button 
+              onClick={() => deleteNode(id)}
+              className="w-4 h-4 rounded flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors text-xs"
+              title="Delete Node"
+            >
+              ×
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="p-3 flex flex-col gap-3">
-        {def.inputs.map((input) => (
-          <div key={input.id} className="relative flex items-center h-6">
-            <Handle
-              type="target"
-              position={Position.Left}
-              id={input.id}
-              className={`w-3 h-3 border-2 border-secondary bg-primary hover:bg-accent hover:border-accent transition-colors`}
-              style={{ left: -18, top: '50%' }}
-            />
-            <div className="text-[11px] font-medium text-text-muted flex items-center gap-2 w-full">
-              <span className="shrink-0">{input.name}</span>
-              {renderInputControl(input)}
+      {/* Sockets Container */}
+      <div className="p-3 flex flex-col gap-2.5">
+        {/* Input Sockets */}
+        {def.inputs.map((input) => {
+          const color = TYPE_COLORS[input.type] || '#a1a1aa';
+          return (
+            <div key={input.id} className="relative flex items-center h-6">
+              <Handle
+                type="target"
+                position={Position.Left}
+                id={input.id}
+                className="w-2.5 h-2.5 border border-zinc-900 rounded-full transition-transform hover:scale-125"
+                style={{ 
+                  left: -17, 
+                  backgroundColor: color,
+                  boxShadow: `0 0 0 2px #18181b` 
+                }}
+              />
+              <div className="text-xs font-medium text-zinc-300 flex items-center gap-2 w-full">
+                <span className="font-mono text-zinc-300 shrink-0">{input.name}</span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase">{input.type}</span>
+                {renderInputControl(input)}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
-        {def.outputs.map((output) => (
-          <div key={output.id} className="relative flex items-center justify-end h-6">
-            <span className="text-[11px] font-medium text-text-muted">{output.name}</span>
-            <Handle
-              type="source"
-              position={Position.Right}
-              id={output.id}
-              className={`w-3 h-3 border-2 border-secondary bg-primary hover:bg-accent hover:border-accent transition-colors`}
-              style={{ right: -18, top: '50%' }}
-            />
-          </div>
-        ))}
+        {/* Output Sockets */}
+        {def.outputs.map((output) => {
+          const color = TYPE_COLORS[output.type] || '#a1a1aa';
+          return (
+            <div key={output.id} className="relative flex items-center justify-end h-6">
+              <div className="text-xs font-medium flex items-center gap-1.5 mr-1">
+                <span className="text-[10px] font-mono text-zinc-500 uppercase">{output.type}</span>
+                <span className="font-mono text-zinc-300">{output.name}</span>
+              </div>
+              <Handle
+                type="source"
+                position={Position.Right}
+                id={output.id}
+                className="w-2.5 h-2.5 border border-zinc-900 rounded-full transition-transform hover:scale-125"
+                style={{ 
+                  right: -17, 
+                  backgroundColor: color,
+                  boxShadow: `0 0 0 2px #18181b` 
+                }}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

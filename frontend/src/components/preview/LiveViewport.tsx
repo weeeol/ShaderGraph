@@ -66,40 +66,60 @@ const ShaderMesh = ({ geometry }: { geometry: 'plane' | 'box' | 'sphere' }) => {
 
 export const LiveViewport = () => {
   const [geometry, setGeometry] = useState<'plane' | 'box' | 'sphere'>('box');
-  const { compilerError } = useGraphStore();
+  const { compilerError, theme } = useGraphStore();
 
   return (
-    <div className="h-full w-full flex flex-col relative overflow-hidden group bg-[#0d0d0f]">
-      <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-center z-10 bg-gradient-to-b from-secondary/90 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-        <h3 className="text-[10px] font-bold text-text/80 uppercase tracking-widest pointer-events-auto shadow-black drop-shadow-md">3D Preview</h3>
-        <div className="flex gap-2 pointer-events-auto">
+    <div className="h-full w-full flex flex-col relative overflow-hidden bg-zinc-950">
+      {/* Permanent Viewport Toolbar */}
+      <div className="px-3.5 py-2 bg-zinc-950 border-b border-zinc-800/80 flex items-center justify-between shrink-0 z-10">
+        <div className="flex items-center gap-2">
+          <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider">3D Viewport</h3>
+          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-500">
+            WebGL2
+          </span>
+        </div>
+
+        {/* Geometry Segmented Switcher */}
+        <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-md p-0.5">
           <button 
             onClick={() => setGeometry('box')}
-            className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${geometry === 'box' ? 'bg-accent/20 text-accent ring-1 ring-accent' : 'bg-primary/50 text-text-muted hover:text-text hover:bg-primary'}`}
-            title="Cube"
+            className={`px-2.5 py-0.5 rounded text-[11px] font-mono transition-colors ${
+              geometry === 'box' 
+                ? 'bg-zinc-800 text-zinc-100 font-semibold shadow-xs' 
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+            title="Cube Mesh"
           >
-            <div className="w-2.5 h-2.5 border-2 border-current rounded-sm"></div>
+            Cube
           </button>
           <button 
             onClick={() => setGeometry('sphere')}
-            className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${geometry === 'sphere' ? 'bg-accent/20 text-accent ring-1 ring-accent' : 'bg-primary/50 text-text-muted hover:text-text hover:bg-primary'}`}
-            title="Sphere"
+            className={`px-2.5 py-0.5 rounded text-[11px] font-mono transition-colors ${
+              geometry === 'sphere' 
+                ? 'bg-zinc-800 text-zinc-100 font-semibold shadow-xs' 
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+            title="Sphere Mesh"
           >
-            <div className="w-3 h-3 border-2 border-current rounded-full"></div>
+            Sphere
           </button>
           <button 
             onClick={() => setGeometry('plane')}
-            className={`w-6 h-6 rounded-md flex items-center justify-center transition-all ${geometry === 'plane' ? 'bg-accent/20 text-accent ring-1 ring-accent' : 'bg-primary/50 text-text-muted hover:text-text hover:bg-primary'}`}
-            title="Plane"
+            className={`px-2.5 py-0.5 rounded text-[11px] font-mono transition-colors ${
+              geometry === 'plane' 
+                ? 'bg-zinc-800 text-zinc-100 font-semibold shadow-xs' 
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+            title="Plane Quad"
           >
-            <div className="w-3 h-1 bg-current rounded-sm"></div>
+            Plane
           </button>
         </div>
       </div>
       
       <div className="flex-1 relative">
         <Canvas camera={{ position: [0, 0, 4] }}>
-          <color attach="background" args={['#0d0d0f']} />
+          <color attach="background" args={[theme === 'light' ? '#25252b' : '#09090b']} />
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} />
           <ShaderMesh geometry={geometry} />
@@ -108,9 +128,9 @@ export const LiveViewport = () => {
       </div>
 
       {compilerError && (
-        <div className="absolute bottom-4 left-4 right-4 text-red-400 text-center p-4 bg-red-950/80 rounded-xl border border-red-500/30 backdrop-blur-md shadow-2xl max-h-32 overflow-y-auto custom-scrollbar">
-          <p className="font-semibold text-[10px] uppercase tracking-wider mb-2">Compilation Error</p>
-          <pre className="text-[10px] font-mono text-left whitespace-pre-wrap">{compilerError}</pre>
+        <div className="absolute bottom-4 left-4 right-4 text-red-300 p-3 bg-red-950/90 rounded-lg border border-red-800/80 backdrop-blur-md shadow-2xl max-h-32 overflow-y-auto custom-scrollbar font-mono text-xs">
+          <div className="font-semibold text-[10px] text-red-400 uppercase tracking-wider mb-1">Shader Compilation Error</div>
+          <pre className="text-xs whitespace-pre-wrap">{compilerError}</pre>
         </div>
       )}
     </div>

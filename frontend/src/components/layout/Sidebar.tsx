@@ -1,68 +1,132 @@
+import { useState } from 'react';
 import type { DragEvent } from 'react';
+import { Search, X, GripVertical } from 'lucide-react';
 import { NODE_REGISTRY } from '../../core/nodes/registry';
 
+const CATEGORY_CONFIG: Record<string, { types: string[]; dot: string }> = {
+  'Inputs': {
+    types: ['uv', 'time', 'resolution', 'mouse', 'floatConstant', 'colorConstant'],
+    dot: 'bg-emerald-400'
+  },
+  'Math': {
+    types: ['add', 'subtract', 'multiply', 'divide', 'mix', 'clamp', 'step', 'smoothstep', 'sin', 'cos', 'power', 'dot', 'cross', 'normalize', 'length', 'fract', 'abs', 'min', 'max'],
+    dot: 'bg-cyan-400'
+  },
+  'Channel Ops': {
+    types: ['split', 'combine'],
+    dot: 'bg-blue-400'
+  },
+  'Procedural': {
+    types: ['simplex2d', 'voronoi', 'checkerboard'],
+    dot: 'bg-purple-400'
+  },
+  'UV Operations': {
+    types: ['tileAndOffset', 'polarCoords', 'rotateUv'],
+    dot: 'bg-teal-400'
+  },
+  'Filters': {
+    types: ['invert', 'contrast'],
+    dot: 'bg-amber-400'
+  }
+};
+
 export const Sidebar = () => {
+  const [search, setSearch] = useState('');
+
   const onDragStart = (event: DragEvent<HTMLDivElement>, nodeType: string) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
   };
 
-  // Group nodes by some internal logic or just list them
-  // For simplicity, we'll exclude masterOutput
   const availableNodes = Object.values(NODE_REGISTRY).filter(n => n.type !== 'masterOutput');
 
-  // Basic categorization based on type prefix or manual mapping could be done here, 
-  // but listing them alphabetically or sequentially is fine for now.
-  const categories: Record<string, typeof availableNodes> = {
-    'Inputs': availableNodes.filter(n => ['uv', 'time', 'resolution', 'mouse', 'vector', 'float'].includes(n.type)),
-    'Math': availableNodes.filter(n => ['add', 'subtract', 'multiply', 'divide', 'mix', 'clamp', 'step', 'smoothstep', 'sin', 'cos', 'power', 'dot', 'cross', 'normalize', 'length', 'fract', 'abs', 'min', 'max'].includes(n.type)),
-    'Channel Ops': availableNodes.filter(n => ['split', 'combine'].includes(n.type)),
-    'Procedural': availableNodes.filter(n => ['valueNoise', 'simplex2d', 'voronoi', 'checkerboard'].includes(n.type)),
-    'UV Operations': availableNodes.filter(n => ['tileAndOffset', 'polarCoords', 'rotateUv'].includes(n.type)),
-    'Filters': availableNodes.filter(n => ['invert', 'contrast', 'normalFromHeight'].includes(n.type)),
-  };
+  const filteredNodes = search.trim()
+    ? availableNodes.filter(n => 
+        n.name.toLowerCase().includes(search.toLowerCase()) || 
+        n.type.toLowerCase().includes(search.toLowerCase())
+      )
+    : availableNodes;
 
   return (
-    <div className="w-full bg-secondary/95 backdrop-blur-md border-r border-border flex flex-col h-full shrink-0 z-10">
-      <div className="p-4 border-b border-border/50">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3 flex items-center gap-2">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-          </svg>
-          Node Library
-        </h2>
+    <div className="w-full bg-zinc-950 border-r border-zinc-800/80 flex flex-col h-full shrink-0 z-10">
+      {/* Palette Header & Search */}
+      <div className="p-3.5 border-b border-zinc-800/80 bg-zinc-900/30 shrink-0">
+        <div className="flex items-center justify-between mb-2.5">
+          <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+            Node Library
+          </span>
+          <span className="text-[10px] font-mono text-zinc-500">
+            {availableNodes.length} NODES
+          </span>
+        </div>
+
         <div className="relative">
-          <svg className="w-4 h-4 absolute left-2.5 top-2.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+          <Search size={14} className="absolute left-2.5 top-2.5 text-zinc-500" />
           <input 
             type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Search nodes..."
-            className="w-full bg-primary border border-border rounded-md py-1.5 pl-9 pr-3 text-xs text-text focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent transition-shadow shadow-inner placeholder:text-text-muted/50"
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-1.5 pl-8 pr-7 text-xs text-zinc-200 focus:outline-none focus:border-zinc-600 transition-colors font-mono placeholder:text-zinc-600"
           />
+          {search && (
+            <button 
+              onClick={() => setSearch('')}
+              className="absolute right-2 top-2 text-zinc-500 hover:text-zinc-300"
+            >
+              <X size={13} />
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-6 custom-scrollbar">
-        {Object.entries(categories).map(([category, nodes]) => (
-          nodes.length > 0 && (
+      {/* Nodes List */}
+      <div className="flex-1 overflow-y-auto p-3.5 flex flex-col gap-4 custom-scrollbar">
+        {Object.entries(CATEGORY_CONFIG).map(([category, config]) => {
+          const categoryNodes = filteredNodes.filter(n => config.types.includes(n.type));
+          if (categoryNodes.length === 0) return null;
+
+          return (
             <div key={category}>
-              <h3 className="text-[10px] font-semibold text-text-muted mb-2 uppercase tracking-wider">{category}</h3>
-              <div className="flex flex-col gap-1.5">
-                {nodes.map(node => (
-                  <div 
-                    key={node.id}
-                    draggable
-                    onDragStart={(e) => onDragStart(e, node.type)}
-                    className="bg-primary/50 border border-border/40 hover:border-accent/40 rounded-md px-3 py-2 text-xs font-medium text-text cursor-grab active:cursor-grabbing hover:-translate-y-[1px] hover:shadow-lg hover:shadow-accent/5 hover:bg-primary transition-all duration-200"
-                  >
-                    {node.name}
-                  </div>
-                ))}
+              <div className="flex items-center gap-1.5 mb-1.5 px-1">
+                <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
+                <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider font-mono">
+                  {category}
+                </h3>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                {categoryNodes.map(node => {
+                  const mainOutput = node.outputs[0]?.type || '';
+                  return (
+                    <div 
+                      key={node.id}
+                      draggable
+                      onDragStart={(e) => onDragStart(e, node.type)}
+                      className="bg-zinc-900/60 hover:bg-zinc-800/90 border border-zinc-800/70 hover:border-zinc-700 rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-200 cursor-grab active:cursor-grabbing flex items-center justify-between transition-colors group select-none"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <GripVertical size={13} className="text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
+                        <span>{node.name}</span>
+                      </div>
+                      {mainOutput && (
+                        <span className="text-[10px] font-mono text-zinc-500 uppercase shrink-0">
+                          {mainOutput}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          )
-        ))}
+          );
+        })}
+
+        {filteredNodes.length === 0 && (
+          <div className="text-center py-8 text-xs text-zinc-500">
+            No matching nodes for "{search}"
+          </div>
+        )}
       </div>
     </div>
   );

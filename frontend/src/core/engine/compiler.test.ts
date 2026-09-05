@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { transpileGraphToGLSL } from './compiler';
 import type { GraphNode, GraphEdge } from './types';
-
-import { NODE_REGISTRY as mockRegistry } from '../nodes/registry';
+import { NODE_REGISTRY } from '../nodes/registry';
+import { SAMPLE_GRAPHS } from '../samples/samples';
 
 describe('DAG Transpiler', () => {
   it('should compile a simple node graph without errors', () => {
@@ -15,12 +15,12 @@ describe('DAG Transpiler', () => {
       { id: 'e1', source: 'add1', sourceHandle: 'out', target: 'master', targetHandle: 'color' }
     ];
 
-    const result = transpileGraphToGLSL(nodes, edges, 'master', mockRegistry);
+    const result = transpileGraphToGLSL(nodes, edges, 'master', NODE_REGISTRY);
     
     expect(result.error).toBeUndefined();
-    expect(result.glslCode).toContain('float node_add1_out_out;');
-    expect(result.glslCode).toContain('node_add1_out_out = 1.50000 + 2.00000;');
-    expect(result.glslCode).toContain('fragColor = vec4(node_add1_out_out);'); // due to vec4 cast
+    expect(result.glslCode).toContain('vec4 node_add1_out_out;');
+    expect(result.glslCode).toContain('node_add1_out_out = vec4(1.50000, 1.50000, 1.50000, 1.50000) + vec4(2.00000, 2.00000, 2.00000, 2.00000);');
+    expect(result.glslCode).toContain('fragColor = node_add1_out_out;');
   });
 
   it('should detect cycles', () => {
@@ -36,7 +36,33 @@ describe('DAG Transpiler', () => {
       { id: 'e3', source: 'add1', sourceHandle: 'out', target: 'add2', targetHandle: 'a' } // cycle
     ];
 
-    const result = transpileGraphToGLSL(nodes, edges, 'master', mockRegistry);
+    const result = transpileGraphToGLSL(nodes, edges, 'master', NODE_REGISTRY);
     expect(result.error).toBe('Cycle detected in graph.');
+  });
+
+  describe('Sample Graphs Compilation', () => {
+    SAMPLE_GRAPHS.forEach((sample) => {
+      it(`should successfully compile ${sample.name}`, () => {
+        const graphNodes: GraphNode[] = sample.nodes.map(n => ({
+          id: n.id,
+          type: n.type || '',
+          position: n.position,
+          data: n.data as any
+        }));
+
+        const graphEdges: GraphEdge[] = sample.edges.map(e => ({
+          id: e.id,
+          source: e.source,
+          sourceHandle: e.sourceHandle || '',
+          target: e.target,
+          targetHandle: e.targetHandle || ''
+        }));
+
+        const result = transpileGraphToGLSL(graphNodes, graphEdges, 'master-node', NODE_REGISTRY);
+        expect(result.error).toBeUndefined();
+        expect(result.glslCode).toContain('#version 300 es');
+        expect(result.glslCode).toContain('fragColor =');
+      });
+    });
   });
 });

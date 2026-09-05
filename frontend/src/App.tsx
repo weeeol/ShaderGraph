@@ -13,6 +13,8 @@ import '@xyflow/react/dist/style.css';
 import { useGraphStore } from './store/useGraphStore';
 import { CustomNode } from './components/graph/CustomNode';
 import { Header } from './components/layout/Header';
+import { IntroModal } from './components/layout/IntroModal';
+import { WorkspaceModal } from './components/layout/WorkspaceModal';
 import { LiveViewport } from './components/preview/LiveViewport';
 import { GLSLViewer } from './components/preview/GLSLViewer';
 import { Sidebar } from './components/layout/Sidebar';
@@ -29,11 +31,20 @@ const edgeTypes = {
 };
 
 function ShaderGraph() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, compile, addNode } = useGraphStore();
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, compile, addNode, theme } = useGraphStore();
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDockOpen, setIsDockOpen] = useState(true);
+  const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(true);
+  const [isIntroOpen, setIsIntroOpen] = useState(false);
+
+  const handleCloseIntro = (dontShowAgain?: boolean) => {
+    if (dontShowAgain) {
+      localStorage.setItem('shadergraph_intro_seen', 'true');
+    }
+    setIsIntroOpen(false);
+  };
 
   useEffect(() => {
     compile();
@@ -73,12 +84,14 @@ function ShaderGraph() {
         isDockOpen={isDockOpen} 
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         toggleDock={() => setIsDockOpen(!isDockOpen)}
+        onOpenIntro={() => setIsIntroOpen(true)}
+        onOpenWorkspace={() => setIsWorkspaceOpen(true)}
       />
       
       <div className="flex flex-1 overflow-hidden relative">
         {/* Left Sidebar */}
         {isSidebarOpen && (
-          <div className="w-64 h-full shrink-0 z-10 shadow-2xl transition-all duration-300 relative">
+          <div className="w-60 h-full shrink-0 z-10 transition-all duration-200 relative">
             <Sidebar />
           </div>
         )}
@@ -98,23 +111,26 @@ function ShaderGraph() {
             fitView
             onDragOver={onDragOver}
             onDrop={onDrop}
-            className="bg-primary"
+            className="bg-zinc-950"
             proOptions={{ hideAttribution: true }}
           >
-            <Background color="#27272a" gap={24} size={1.5} />
-            <Controls className="!bg-secondary !border-border !fill-text-muted hover:!fill-text shadow-xl rounded-lg overflow-hidden" />
+            <Background color={theme === 'light' ? '#c4c4ca' : '#27272a'} gap={20} size={1} />
+            <Controls className="shadow-lg" showInteractive={false} />
             <MiniMap 
-              nodeColor="#6366f1" 
-              maskColor="rgba(9, 9, 11, 0.7)" 
-              className="bg-secondary/80 backdrop-blur-md border border-border rounded-lg shadow-xl"
+              nodeColor={theme === 'light' ? '#8e8e99' : '#52525b'} 
+              nodeStrokeColor={theme === 'light' ? '#71717e' : '#71717a'}
+              bgColor={theme === 'light' ? '#e4e4e8' : '#09090b'}
+              maskColor={theme === 'light' ? 'rgba(228, 228, 232, 0.75)' : 'rgba(9, 9, 11, 0.8)'} 
+              maskStrokeColor={theme === 'light' ? '#4f46e5' : '#71717a'}
+              className="shadow-lg"
             />
           </ReactFlow>
         </div>
 
         {/* Right Dock */}
         {isDockOpen && (
-          <div className="w-[400px] h-full flex flex-col shrink-0 z-10 border-l border-border bg-secondary/95 shadow-2xl transition-all duration-300">
-            <div className="h-[350px] shrink-0 border-b border-border/50">
+          <div className="w-[420px] h-full flex flex-col shrink-0 z-10 border-l border-zinc-800/80 bg-zinc-950 transition-all duration-200">
+            <div className="h-[360px] shrink-0 border-b border-zinc-800/80">
               <LiveViewport />
             </div>
             <div className="flex-1 min-h-[200px]">
@@ -123,6 +139,18 @@ function ShaderGraph() {
           </div>
         )}
       </div>
+
+      {/* First-load Intro Modal */}
+      <IntroModal 
+        isOpen={isIntroOpen} 
+        onClose={handleCloseIntro} 
+      />
+
+      {/* Open Workspace Launcher */}
+      <WorkspaceModal 
+        isOpen={isWorkspaceOpen} 
+        onClose={() => setIsWorkspaceOpen(false)} 
+      />
     </div>
   );
 }

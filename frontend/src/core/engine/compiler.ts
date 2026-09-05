@@ -112,11 +112,20 @@ export const transpileGraphToGLSL = (
         inputsMap[inputDef.id] = varName;
       } else {
         const val = node.data[inputDef.id] !== undefined ? node.data[inputDef.id] : inputDef.defaultValue;
-        if (inputDef.type === 'float') inputsMap[inputDef.id] = Number(val).toFixed(5);
-        else if (inputDef.type === 'vec2') inputsMap[inputDef.id] = "vec2(" + Number(val[0]).toFixed(5) + ", " + Number(val[1]).toFixed(5) + ")";
-        else if (inputDef.type === 'vec3') inputsMap[inputDef.id] = "vec3(" + Number(val[0]).toFixed(5) + ", " + Number(val[1]).toFixed(5) + ", " + Number(val[2]).toFixed(5) + ")";
-        else if (inputDef.type === 'vec4') inputsMap[inputDef.id] = "vec4(" + Number(val[0]).toFixed(5) + ", " + Number(val[1]).toFixed(5) + ", " + Number(val[2]).toFixed(5) + ", " + Number(val[3]).toFixed(5) + ")";
-        else inputsMap[inputDef.id] = String(val);
+        if (inputDef.type === 'float') {
+          inputsMap[inputDef.id] = Number(val || 0).toFixed(5);
+        } else if (inputDef.type === 'vec2') {
+          const v = Array.isArray(val) ? val : [val, val];
+          inputsMap[inputDef.id] = "vec2(" + Number(v[0] || 0).toFixed(5) + ", " + Number(v[1] || 0).toFixed(5) + ")";
+        } else if (inputDef.type === 'vec3') {
+          const v = Array.isArray(val) ? val : [val, val, val];
+          inputsMap[inputDef.id] = "vec3(" + Number(v[0] || 0).toFixed(5) + ", " + Number(v[1] || 0).toFixed(5) + ", " + Number(v[2] || 0).toFixed(5) + ")";
+        } else if (inputDef.type === 'vec4') {
+          const v = Array.isArray(val) ? val : [val, val, val, val];
+          inputsMap[inputDef.id] = "vec4(" + Number(v[0] || 0).toFixed(5) + ", " + Number(v[1] || 0).toFixed(5) + ", " + Number(v[2] || 0).toFixed(5) + ", " + Number(v[3] !== undefined ? v[3] : 1).toFixed(5) + ")";
+        } else {
+          inputsMap[inputDef.id] = String(val);
+        }
       }
     }
 

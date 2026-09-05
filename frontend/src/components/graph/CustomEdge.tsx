@@ -31,7 +31,7 @@ export const CustomEdge = ({
 
   return (
     <>
-      <BaseEdge path={edgePath} markerEnd={markerEnd} style={{...style, strokeWidth: 3, stroke: '#888'}} />
+      <BaseEdge path={edgePath} markerEnd={markerEnd} style={{ ...style, strokeWidth: 2, stroke: '#71717a' }} />
       <EdgeLabelRenderer>
         <div
           style={{
@@ -42,9 +42,9 @@ export const CustomEdge = ({
           className="nodrag nopan"
         >
           <button
-            className="w-4 h-4 bg-primary border border-border text-text-muted hover:text-red-400 hover:border-red-400 rounded-full flex items-center justify-center text-[10px] cursor-pointer opacity-0 hover:opacity-100 transition-opacity"
+            className="w-5 h-5 bg-zinc-900 border border-zinc-700 hover:border-red-500/60 text-zinc-400 hover:text-red-400 rounded-full flex items-center justify-center text-xs cursor-pointer opacity-0 hover:opacity-100 transition-opacity shadow-md"
             onClick={onEdgeClick}
-            title="Delete Connection"
+            title="Disconnect Wire"
           >
             ×
           </button>
