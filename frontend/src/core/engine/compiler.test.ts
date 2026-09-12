@@ -65,4 +65,47 @@ describe('DAG Transpiler', () => {
       });
     });
   });
+
+  describe('Animated Sample Templates (TASK-001)', () => {
+    const animatedTemplateIds = [
+      'rotating-checker-array',
+      'drifting-voronoi-field',
+      'pulse-gradient'
+    ];
+
+    animatedTemplateIds.forEach((sampleId) => {
+      it(`should verify animated sample ${sampleId} contains reachable time node and emits u_time in GLSL`, () => {
+        const sample = SAMPLE_GRAPHS.find(s => s.id === sampleId);
+        expect(sample).toBeDefined();
+        if (!sample) return;
+
+        // Verify template has a time node
+        const timeNode = sample.nodes.find(n => n.type === 'time');
+        expect(timeNode).toBeDefined();
+        expect(sample.nodes.some(n => n.id === 'master-node' && n.type === 'masterOutput')).toBe(true);
+
+        const graphNodes: GraphNode[] = sample.nodes.map(n => ({
+          id: n.id,
+          type: n.type || '',
+          position: n.position,
+          data: n.data as any
+        }));
+
+        const graphEdges: GraphEdge[] = sample.edges.map(e => ({
+          id: e.id,
+          source: e.source,
+          sourceHandle: e.sourceHandle || '',
+          target: e.target,
+          targetHandle: e.targetHandle || ''
+        }));
+
+        const result = transpileGraphToGLSL(graphNodes, graphEdges, 'master-node', NODE_REGISTRY);
+        expect(result.error).toBeUndefined();
+        expect(result.glslCode).toContain('u_time');
+        // Verify that the time node's output is actually computed and declared
+        const safeTimeId = timeNode!.id.replace(/-/g, '_');
+        expect(result.glslCode).toContain(`node_${safeTimeId}_out_t = u_time;`);
+      });
+    });
+  });
 });

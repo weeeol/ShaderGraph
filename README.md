@@ -29,6 +29,9 @@ Construct complex GLSL fragment shaders through a node-based DAG (Directed Acycl
   - **Emerald Marble**: Simplex procedural noise routed through contrast enhancement and multi-stop color blending.
   - **Voronoi Sci-Fi Shield**: Polar coordinate distortion driving Worley/Voronoi cells with smoothstep edge glows.
   - **Chromatic Sine Flow**: Time-multiplied harmonic sine waves creating vibrant animated interference patterns.
+  - **Rotating Checker Array**: Dynamic time-driven coordinate space rotation driving an alternating procedural checkerboard grid.
+  - **Drifting Voronoi Field**: Continuous time-translated UV coordinate space modulating procedural cellular Voronoi distance fields.
+  - **Pulse Gradient**: Periodic color interpolation driven by harmonic sinusoidal time oscillation.
 - **Local Persistence & Portability**: Save graphs directly in browser `localStorage`, export graphs as `.json` files, or import project files from your local disk.
 
 ### Eye-Friendly Dual Theme

@@ -20,9 +20,10 @@ interface WorkspaceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onNewBlankGraph?: () => void;
+  onGraphLoaded?: () => void;
 }
 
-export const WorkspaceModal = ({ isOpen, onClose, onNewBlankGraph }: WorkspaceModalProps) => {
+export const WorkspaceModal = ({ isOpen, onClose, onNewBlankGraph, onGraphLoaded }: WorkspaceModalProps) => {
   const { 
     nodes, 
     edges, 
@@ -66,16 +67,19 @@ export const WorkspaceModal = ({ isOpen, onClose, onNewBlankGraph }: WorkspaceMo
     if (onNewBlankGraph) {
       onNewBlankGraph();
     }
+    onGraphLoaded?.();
   };
 
   const handleLoadSample = (sample: SampleGraph) => {
     loadGraph(sample.nodes, sample.edges, sample.name);
     onClose();
+    onGraphLoaded?.();
   };
 
   const handleLoadSaved = (saved: typeof savedGraphs[0]) => {
     loadGraph(saved.nodes, saved.edges, saved.name);
     onClose();
+    onGraphLoaded?.();
   };
 
   const handleSave = () => {
@@ -115,6 +119,7 @@ export const WorkspaceModal = ({ isOpen, onClose, onNewBlankGraph }: WorkspaceMo
         if (Array.isArray(json.nodes) && Array.isArray(json.edges)) {
           loadGraph(json.nodes, json.edges, json.name || file.name.replace(/\.json$/, ''));
           onClose();
+          onGraphLoaded?.();
         } else {
           alert('Invalid ShaderGraph JSON structure.');
         }

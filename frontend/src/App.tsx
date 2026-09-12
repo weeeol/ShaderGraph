@@ -47,13 +47,23 @@ function ShaderGraph() {
   } = useGraphStore();
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDockOpen, setIsDockOpen] = useState(true);
   const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(true);
   const [isIntroOpen, setIsIntroOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchPosition, setSearchPosition] = useState<{ x: number; y: number } | null>(null);
+
+  const handleGraphLoaded = useCallback(() => {
+    requestAnimationFrame(() => {
+      fitView({
+        padding: 0.18,
+        maxZoom: 1.0,
+        duration: 200,
+      });
+    });
+  }, [fitView]);
 
   const mousePositionRef = useRef<{ x: number; y: number }>({
     x: typeof window !== 'undefined' ? window.innerWidth / 2 : 400,
@@ -282,6 +292,7 @@ function ShaderGraph() {
         onNewBlankGraph={() => {
           setIsIntroOpen(true);
         }}
+        onGraphLoaded={handleGraphLoaded}
       />
     </div>
   );
