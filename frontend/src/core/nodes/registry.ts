@@ -10,7 +10,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'color', name: 'Color', type: 'vec4', defaultValue: [0, 0, 0, 1] }
     ],
     outputs: [],
-    glslTemplate: "fragColor = {{in_color}};"
+    semantic: { type: 'master_output' }
   },
 
   // --- INPUTS ---
@@ -22,7 +22,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     outputs: [
       { id: 'uv', name: 'UV', type: 'vec2' }
     ],
-    glslTemplate: "{{out_uv}} = v_uv;"
+    semantic: { type: 'system_input', input: 'uv' }
   },
   time: {
     id: 'time',
@@ -32,7 +32,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     outputs: [
       { id: 't', name: 'Time', type: 'float' }
     ],
-    glslTemplate: "{{out_t}} = u_time;"
+    semantic: { type: 'system_input', input: 'time' }
   },
   resolution: {
     id: 'resolution',
@@ -42,7 +42,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     outputs: [
       { id: 'res', name: 'Resolution', type: 'vec2' }
     ],
-    glslTemplate: "{{out_res}} = u_resolution;"
+    semantic: { type: 'system_input', input: 'resolution' }
   },
   mouse: {
     id: 'mouse',
@@ -52,7 +52,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     outputs: [
       { id: 'm', name: 'Mouse', type: 'vec2' }
     ],
-    glslTemplate: "{{out_m}} = u_mouse;"
+    semantic: { type: 'system_input', input: 'mouse' }
   },
   floatConstant: {
     id: 'floatConstant',
@@ -64,7 +64,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     outputs: [
       { id: 'out', name: 'Out', type: 'float' }
     ],
-    glslTemplate: "{{out_out}} = {{in_val}};"
+    semantic: { type: 'constant' }
   },
   colorConstant: {
     id: 'colorConstant',
@@ -76,7 +76,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     outputs: [
       { id: 'out', name: 'Out', type: 'vec4' }
     ],
-    glslTemplate: "{{out_out}} = {{in_val}};"
+    semantic: { type: 'constant' }
   },
 
   // --- MATH ---
@@ -89,7 +89,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'b', name: 'B', type: 'vec4', defaultValue: [0, 0, 0, 0] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = {{in_a}} + {{in_b}};"
+    semantic: { type: 'binary_op', operator: '+' }
   },
   subtract: {
     id: 'subtract',
@@ -100,7 +100,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'b', name: 'B', type: 'vec4', defaultValue: [0, 0, 0, 0] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = {{in_a}} - {{in_b}};"
+    semantic: { type: 'binary_op', operator: '-' }
   },
   multiply: {
     id: 'multiply',
@@ -111,7 +111,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'b', name: 'B', type: 'vec4', defaultValue: [1, 1, 1, 1] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = {{in_a}} * {{in_b}};"
+    semantic: { type: 'binary_op', operator: '*' }
   },
   divide: {
     id: 'divide',
@@ -122,7 +122,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'b', name: 'B', type: 'vec4', defaultValue: [1, 1, 1, 1] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = {{in_a}} / {{in_b}};"
+    semantic: { type: 'binary_op', operator: '/' }
   },
   mix: {
     id: 'mix',
@@ -134,7 +134,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 't', name: 'T', type: 'vec4', defaultValue: [0.5, 0.5, 0.5, 0.5] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = mix({{in_a}}, {{in_b}}, {{in_t}});"
+    semantic: { type: 'interpolate' }
   },
   clamp: {
     id: 'clamp',
@@ -146,7 +146,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'max', name: 'Max', type: 'vec4', defaultValue: [1, 1, 1, 1] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = clamp({{in_val}}, {{in_min}}, {{in_max}});"
+    semantic: { type: 'clamp' }
   },
   step: {
     id: 'step',
@@ -157,7 +157,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = step({{in_edge}}, {{in_val}});"
+    semantic: { type: 'step' }
   },
   smoothstep: {
     id: 'smoothstep',
@@ -169,7 +169,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'val', name: 'Val', type: 'vec4', defaultValue: [0.5, 0.5, 0.5, 0.5] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = smoothstep({{in_edge0}}, {{in_edge1}}, {{in_val}});"
+    semantic: { type: 'smoothstep' }
   },
   sin: {
     id: 'sin',
@@ -177,7 +177,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     name: 'Sine',
     inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = sin({{in_val}});"
+    semantic: { type: 'sine' }
   },
   cos: {
     id: 'cos',
@@ -185,7 +185,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     name: 'Cosine',
     inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = cos({{in_val}});"
+    semantic: { type: 'cosine' }
   },
   power: {
     id: 'power',
@@ -196,7 +196,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'exp', name: 'Exp', type: 'vec4', defaultValue: [2, 2, 2, 2] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = pow(max({{in_base}}, vec4(0.0)), {{in_exp}});"
+    semantic: { type: 'power' }
   },
   dot: {
     id: 'dot',
@@ -207,7 +207,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'b', name: 'B', type: 'vec4', defaultValue: [0, 0, 0, 0] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'float' }],
-    glslTemplate: "{{out_out}} = dot({{in_a}}, {{in_b}});"
+    semantic: { type: 'dot_product' }
   },
   cross: {
     id: 'cross',
@@ -218,7 +218,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'b', name: 'B', type: 'vec3', defaultValue: [0, 0, 0] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec3' }],
-    glslTemplate: "{{out_out}} = cross({{in_a}}, {{in_b}});"
+    semantic: { type: 'cross_product' }
   },
   normalize: {
     id: 'normalize',
@@ -226,7 +226,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     name: 'Normalize',
     inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = normalize({{in_val}});"
+    semantic: { type: 'normalize' }
   },
   length: {
     id: 'length',
@@ -234,7 +234,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     name: 'Length',
     inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
     outputs: [{ id: 'out', name: 'Out', type: 'float' }],
-    glslTemplate: "{{out_out}} = length({{in_val}});"
+    semantic: { type: 'length' }
   },
   fract: {
     id: 'fract',
@@ -242,7 +242,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     name: 'Fract',
     inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = fract({{in_val}});"
+    semantic: { type: 'fractional' }
   },
   abs: {
     id: 'abs',
@@ -250,7 +250,7 @@ export const NODE_REGISTRY: NodeRegistry = {
     name: 'Absolute',
     inputs: [{ id: 'val', name: 'Val', type: 'vec4', defaultValue: [0, 0, 0, 0] }],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = abs({{in_val}});"
+    semantic: { type: 'absolute' }
   },
   min: {
     id: 'min',
@@ -261,7 +261,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'b', name: 'B', type: 'vec4', defaultValue: [0, 0, 0, 0] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = min({{in_a}}, {{in_b}});"
+    semantic: { type: 'minimum' }
   },
   max: {
     id: 'max',
@@ -272,7 +272,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'b', name: 'B', type: 'vec4', defaultValue: [0, 0, 0, 0] }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = max({{in_a}}, {{in_b}});"
+    semantic: { type: 'maximum' }
   },
   split: {
     id: 'split',
@@ -285,12 +285,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'b', name: 'B', type: 'float' },
       { id: 'a', name: 'A', type: 'float' }
     ],
-    glslTemplate: `
-      {{out_r}} = {{in_val}}.r;
-      {{out_g}} = {{in_val}}.g;
-      {{out_b}} = {{in_val}}.b;
-      {{out_a}} = {{in_val}}.a;
-    `
+    semantic: { type: 'split' }
   },
   combine: {
     id: 'combine',
@@ -303,7 +298,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'a', name: 'A', type: 'float', defaultValue: 1.0 }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'vec4' }],
-    glslTemplate: "{{out_out}} = vec4({{in_r}}, {{in_g}}, {{in_b}}, {{in_a}});"
+    semantic: { type: 'combine' }
   },
 
   // --- PROCEDURAL / NOISE ---
@@ -316,7 +311,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'scale', name: 'Scale', type: 'float', defaultValue: 10.0 }
     ],
     outputs: [{ id: 'out', name: 'Noise', type: 'float' }],
-    glslTemplate: "{{out_out}} = snoise({{in_uv}} * {{in_scale}});"
+    semantic: { type: 'procedural_noise', noiseType: 'simplex2d' }
   },
   voronoi: {
     id: 'voronoi',
@@ -327,7 +322,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'scale', name: 'Scale', type: 'float', defaultValue: 5.0 }
     ],
     outputs: [{ id: 'out', name: 'Noise', type: 'float' }],
-    glslTemplate: "{{out_out}} = voronoi({{in_uv}} * {{in_scale}});"
+    semantic: { type: 'procedural_noise', noiseType: 'voronoi' }
   },
   checkerboard: {
     id: 'checkerboard',
@@ -338,10 +333,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'scale', name: 'Scale', type: 'float', defaultValue: 10.0 }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'float' }],
-    glslTemplate: `
-      vec2 scaled_uv = floor({{in_uv}} * {{in_scale}});
-      {{out_out}} = mod(scaled_uv.x + scaled_uv.y, 2.0);
-    `
+    semantic: { type: 'checkerboard' }
   },
 
   // --- UV & FILTERS ---
@@ -355,7 +347,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'offset', name: 'Offset', type: 'vec2', defaultValue: [0, 0] }
     ],
     outputs: [{ id: 'out', name: 'UV', type: 'vec2' }],
-    glslTemplate: "{{out_out}} = ({{in_uv}} * {{in_tiling}}) + {{in_offset}};"
+    semantic: { type: 'tile_and_offset' }
   },
   polarCoords: {
     id: 'polarCoords',
@@ -366,12 +358,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'center', name: 'Center', type: 'vec2', defaultValue: [0.5, 0.5] }
     ],
     outputs: [{ id: 'out', name: 'Polar UV', type: 'vec2' }],
-    glslTemplate: `
-      vec2 delta = {{in_uv}} - {{in_center}};
-      float radius = length(delta) * 2.0;
-      float angle = atan(delta.y, delta.x) / 6.28318530718 + 0.5;
-      {{out_out}} = vec2(radius, angle);
-    `
+    semantic: { type: 'polar_coords' }
   },
   rotateUv: {
     id: 'rotateUv',
@@ -383,12 +370,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'center', name: 'Center', type: 'vec2', defaultValue: [0.5, 0.5] }
     ],
     outputs: [{ id: 'out', name: 'UV', type: 'vec2' }],
-    glslTemplate: `
-      float s = sin({{in_angle}});
-      float c = cos({{in_angle}});
-      vec2 p = {{in_uv}} - {{in_center}};
-      {{out_out}} = vec2(p.x * c - p.y * s, p.x * s + p.y * c) + {{in_center}};
-    `
+    semantic: { type: 'rotate_uv' }
   },
   invert: {
     id: 'invert',
@@ -398,7 +380,7 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'val', name: 'Val', type: 'float', defaultValue: 0.0 }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'float' }],
-    glslTemplate: "{{out_out}} = 1.0 - {{in_val}};"
+    semantic: { type: 'invert' }
   },
   contrast: {
     id: 'contrast',
@@ -409,6 +391,6 @@ export const NODE_REGISTRY: NodeRegistry = {
       { id: 'contrast', name: 'Contrast', type: 'float', defaultValue: 1.0 }
     ],
     outputs: [{ id: 'out', name: 'Out', type: 'float' }],
-    glslTemplate: "{{out_out}} = ({{in_val}} - 0.5) * {{in_contrast}} + 0.5;"
+    semantic: { type: 'contrast' }
   }
 };

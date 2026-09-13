@@ -1,3 +1,5 @@
+import type { SemanticNodeDef } from './semanticOps';
+
 export type DataType = 'float' | 'vec2' | 'vec3' | 'vec4' | 'sampler2D';
 
 export interface PortDefinition {
@@ -13,6 +15,7 @@ export interface NodeDefinition {
   name: string;
   inputs: PortDefinition[];
   outputs: PortDefinition[];
+  semantic?: SemanticNodeDef;
   glslTemplate?: string; 
 }
 
