@@ -1,5 +1,6 @@
 import type { Exporter, ExportTarget } from './types';
 import { exportUnityUrp, exportUnityHdrp } from './unity';
+import { exportUnrealMaterial } from './unreal';
 import { exportWebGL } from './webgl';
 
 export const EXPORTER_REGISTRY: Record<ExportTarget, Exporter> = {
@@ -15,18 +16,18 @@ export const EXPORTER_REGISTRY: Record<ExportTarget, Exporter> = {
     description: 'Unity High Definition Render Pipeline Unlit Custom Function HLSL include.',
     exportGraph: exportUnityHdrp
   },
+  'unreal-material': {
+    target: 'unreal-material',
+    label: 'Unreal Engine (Custom Expression)',
+    description: 'Unreal Engine Material Custom Expression HLSL code body and setup guide.',
+    exportGraph: exportUnrealMaterial
+  },
   'webgl-glsl': {
     target: 'webgl-glsl',
     label: 'WebGL2 (GLSL ES)',
     description: 'Portable WebGL2 fragment shader code for Three.js and custom engines.',
     exportGraph: exportWebGL
-  },
-  'unreal-material': {
-    target: 'unreal-material',
-    label: 'Unreal Engine (Custom Expression)',
-    description: 'Unreal Engine Material Custom Expression HLSL (Coming in TASK-006).',
-    exportGraph: exportUnityUrp // Placeholder for TASK-006
   }
 };
 
-export const AVAILABLE_TARGETS: ExportTarget[] = ['unity-urp', 'unity-hdrp', 'webgl-glsl'];
+export const AVAILABLE_TARGETS: ExportTarget[] = ['unity-urp', 'unity-hdrp', 'unreal-material', 'webgl-glsl'];

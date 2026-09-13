@@ -11,7 +11,7 @@ const hlslTypeName = (type: ShaderType): string => {
     case 'vector4':
       return 'float4';
     case 'sampler2D':
-      throw new Error('sampler2D is not supported in Unity Custom Function HLSL export v1.');
+      throw new Error('sampler2D is not supported in Custom HLSL export v1.');
     default:
       return 'float';
   }
@@ -21,7 +21,14 @@ const formatFloat = (n: number): string => {
   return Number(n || 0).toFixed(5);
 };
 
-export const emitHlslExpr = (expr: IRExpression): string => {
+export interface HlslEmitOptions {
+  libraryPrefix?: string;
+  indent?: string;
+}
+
+export const emitHlslExpr = (expr: IRExpression, options?: HlslEmitOptions): string => {
+  const libPrefix = options?.libraryPrefix ?? 'sg_';
+
   switch (expr.kind) {
     case 'literal': {
       if (expr.type === 'float') {
@@ -61,23 +68,23 @@ export const emitHlslExpr = (expr: IRExpression): string => {
     }
 
     case 'binary':
-      return `${emitHlslExpr(expr.left)} ${expr.operator} ${emitHlslExpr(expr.right)}`;
+      return `${emitHlslExpr(expr.left, options)} ${expr.operator} ${emitHlslExpr(expr.right, options)}`;
 
     case 'unary':
-      return `${expr.operator}(${emitHlslExpr(expr.operand)})`;
+      return `${expr.operator}(${emitHlslExpr(expr.operand, options)})`;
 
     case 'construct': {
       const typeName = hlslTypeName(expr.type);
-      const argsStr = expr.args.map(emitHlslExpr).join(', ');
+      const argsStr = expr.args.map(a => emitHlslExpr(a, options)).join(', ');
       return `${typeName}(${argsStr})`;
     }
 
     case 'swizzle':
-      return `${emitHlslExpr(expr.source)}.${expr.channels}`;
+      return `${emitHlslExpr(expr.source, options)}.${expr.channels}`;
 
     case 'call': {
       const fn = expr.functionName;
-      const args = expr.args.map(emitHlslExpr);
+      const args = expr.args.map(a => emitHlslExpr(a, options));
       switch (fn) {
         case 'interpolate':
           return `lerp(${args[0]}, ${args[1]}, ${args[2]})`;
@@ -116,16 +123,16 @@ export const emitHlslExpr = (expr: IRExpression): string => {
         case 'floor':
           return `floor(${args[0]})`;
         case 'snoise':
-          return `sg_snoise(${args[0]})`;
+          return `${libPrefix}snoise(${args[0]})`;
         case 'voronoi':
-          return `sg_voronoi(${args[0]})`;
+          return `${libPrefix}voronoi(${args[0]})`;
         default:
           return `${fn}(${args.join(', ')})`;
       }
     }
 
     case 'cast': {
-      const valStr = emitHlslExpr(expr.expr);
+      const valStr = emitHlslExpr(expr.expr, options);
       const from = expr.fromType;
       const to = expr.toType;
       if (from === to) return valStr;
@@ -161,19 +168,20 @@ export const emitHlslExpr = (expr: IRExpression): string => {
   }
 };
 
-const emitHlslStatement = (stmt: IRStatement): string => {
+const emitHlslStatement = (stmt: IRStatement, options?: HlslEmitOptions): string => {
+  const ind = options?.indent ?? '    ';
   switch (stmt.kind) {
     case 'declare': {
       const typeStr = hlslTypeName(stmt.type);
       if (stmt.initializer) {
-        return `    ${typeStr} ${stmt.name} = ${emitHlslExpr(stmt.initializer)};\n`;
+        return `${ind}${typeStr} ${stmt.name} = ${emitHlslExpr(stmt.initializer, options)};\n`;
       }
-      return `    ${typeStr} ${stmt.name};\n`;
+      return `${ind}${typeStr} ${stmt.name};\n`;
     }
     case 'assign':
-      return `    ${stmt.target} = ${emitHlslExpr(stmt.value)};\n`;
+      return `${ind}${stmt.target} = ${emitHlslExpr(stmt.value, options)};\n`;
     case 'comment':
-      return `    // ${stmt.text}\n`;
+      return `${ind}// ${stmt.text}\n`;
     default:
       return '';
   }
@@ -286,4 +294,90 @@ ${mainBody}}
 `;
 
   return code;
+};
+
+export const emitUnrealCustomExpression = (ir: ShaderIR, graphName = 'shader_graph'): string => {
+  const cleanName = sanitizeGraphName(graphName);
+  const options: HlslEmitOptions = { libraryPrefix: 'UE_Helpers::', indent: '' };
+
+  let helperStruct = '';
+  if (ir.requiredLibraries.size > 0) {
+    let structMembers = '';
+    if (ir.requiredLibraries.has('simplex2d')) {
+      structMembers += `    static float3 mod289(float3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\n` +
+        `    static float2 mod289(float2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }\n` +
+        `    static float3 permute(float3 x) { return mod289(((x * 34.0) + 1.0) * x); }\n\n` +
+        `    static float snoise(float2 v) {\n` +
+        `        const float4 C = float4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);\n` +
+        `        float2 i = floor(v + dot(v, C.yy));\n` +
+        `        float2 x0 = v - i + dot(i, C.xx);\n` +
+        `        float2 i1;\n` +
+        `        i1 = (x0.x > x0.y) ? float2(1.0, 0.0) : float2(0.0, 1.0);\n` +
+        `        float4 x12 = x0.xyxy + C.xxzz;\n` +
+        `        x12.xy -= i1;\n` +
+        `        i = mod289(i);\n` +
+        `        float3 p = permute(permute(i.y + float3(0.0, i1.y, 1.0)) + i.x + float3(0.0, i1.x, 1.0));\n` +
+        `        float3 m = max(0.5 - float3(dot(x0, x0), dot(x12.xy, x12.xy), dot(x12.zw, x12.zw)), 0.0);\n` +
+        `        m = m * m;\n` +
+        `        m = m * m;\n` +
+        `        float3 x = 2.0 * frac(p * C.www) - 1.0;\n` +
+        `        float3 h = abs(x) - 0.5;\n` +
+        `        float3 ox = floor(x + 0.5);\n` +
+        `        float3 a0 = x - ox;\n` +
+        `        m *= 1.79284291400159 - 0.85373472095314 * (a0 * a0 + h * h);\n` +
+        `        float3 g;\n` +
+        `        g.x = a0.x * x0.x + h.x * x0.y;\n` +
+        `        g.yz = a0.yz * x12.xz + h.yz * x12.yw;\n` +
+        `        return 130.0 * dot(m, g);\n` +
+        `    }\n\n`;
+    }
+
+    if (ir.requiredLibraries.has('voronoi')) {
+      structMembers += `    static float2 random2(float2 p) {\n` +
+        `        return frac(sin(float2(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)))) * 43758.5453);\n` +
+        `    }\n\n` +
+        `    static float voronoi(float2 x) {\n` +
+        `        float2 n = floor(x);\n` +
+        `        float2 f = frac(x);\n` +
+        `        float m = 8.0;\n` +
+        `        for (int j = -1; j <= 1; j++) {\n` +
+        `            for (int i = -1; i <= 1; i++) {\n` +
+        `                float2 g = float2(float(i), float(j));\n` +
+        `                float2 o = random2(n + g);\n` +
+        `                float2 r = g - f + o;\n` +
+        `                float d = dot(r, r);\n` +
+        `                m = min(m, d);\n` +
+        `            }\n` +
+        `        }\n` +
+        `        return sqrt(m);\n` +
+        `    }\n`;
+    }
+
+    helperStruct = `// Helper structure for function-local noise libraries\nstruct UE_Helpers {\n${structMembers}};\n\n`;
+  }
+
+  let mainBody = '';
+  for (const block of ir.blocks) {
+    let blockBody = `// Node: ${block.nodeName} (${block.nodeId})\n`;
+    for (const stmt of block.statements) {
+      blockBody += emitHlslStatement(stmt, options);
+    }
+    mainBody += blockBody + '\n';
+  }
+
+  const baseColorCode = emitHlslExpr(ir.surface.baseColor, options);
+  const alphaCode = emitHlslExpr(ir.surface.alpha, options);
+  mainBody += '// Surface contract output\n';
+  mainBody += `float3 surface_baseColor = ${baseColorCode};\n`;
+  mainBody += `float surface_alpha = ${alphaCode};\n\n`;
+  mainBody += `Alpha = surface_alpha;\n`;
+  mainBody += `return surface_baseColor;\n`;
+
+  return `// --- Unreal Custom Material Expression Code Body ---\n` +
+    `// Description: ${cleanName}\n` +
+    `// Output Type: CMOT Float3\n` +
+    `// Inputs: UV (float2), Time (float)\n` +
+    `// Additional Outputs: Alpha (CMOT Float1)\n\n` +
+    helperStruct +
+    mainBody;
 };

@@ -24,6 +24,7 @@ interface ExportModalProps {
 export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
   const { nodes, edges, currentGraphName, compilerError } = useGraphStore();
   const [selectedTarget, setSelectedTarget] = useState<ExportTarget>('unity-urp');
+  const [selectedFileIndex, setSelectedFileIndex] = useState(0);
   const [copied, setCopied] = useState(false);
 
   // Close on Escape
@@ -36,6 +37,12 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
+
+  // Reset file index on target change
+  const handleSelectTarget = (target: ExportTarget) => {
+    setSelectedTarget(target);
+    setSelectedFileIndex(0);
+  };
 
   // Resolve IR and generate artifact
   const { artifact, resolveError } = useMemo(() => {
@@ -74,7 +81,7 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
     return { artifact: generated, resolveError: null };
   }, [isOpen, nodes, edges, currentGraphName, selectedTarget]);
 
-  const activeFile = artifact?.files[0];
+  const activeFile = artifact?.files[selectedFileIndex] || artifact?.files[0];
 
   const handleCopy = () => {
     if (!activeFile) return;
@@ -142,7 +149,7 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
         </div>
 
         {/* Target Profile Selector Tabs */}
-        <div className="flex items-center gap-1 px-4 py-2 bg-zinc-950 border-b border-zinc-800/60 shrink-0">
+        <div className="flex items-center gap-1 px-4 py-2 bg-zinc-950 border-b border-zinc-800/60 shrink-0 overflow-x-auto custom-scrollbar">
           <span className="text-[11px] font-medium text-zinc-400 mr-2 shrink-0">Target Profile:</span>
           {AVAILABLE_TARGETS.map(target => {
             const exp = EXPORTER_REGISTRY[target];
@@ -150,8 +157,8 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
             return (
               <button
                 key={target}
-                onClick={() => setSelectedTarget(target)}
-                className={`px-3 py-1 text-xs font-medium rounded-md transition-all border ${
+                onClick={() => handleSelectTarget(target)}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-all border shrink-0 ${
                   isSelected
                     ? 'bg-zinc-800 text-zinc-100 border-zinc-700 shadow-xs'
                     : 'bg-zinc-900/50 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:bg-zinc-900'
@@ -182,17 +189,35 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
             {/* Left: Code Viewer */}
             <div className="flex-1 flex flex-col min-w-0 border-b lg:border-b-0 lg:border-r border-zinc-800/80 bg-zinc-950/80">
               {/* File Meta Toolbar */}
-              <div className="flex items-center justify-between px-3 py-2 bg-zinc-900/40 border-b border-zinc-800/60 shrink-0">
+              <div className="flex items-center justify-between px-3 py-2 bg-zinc-900/40 border-b border-zinc-800/60 shrink-0 gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-xs font-mono text-zinc-300 font-medium truncate">
-                    {activeFile.name}
-                  </span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+                  {artifact.files.length > 1 ? (
+                    <div className="flex items-center gap-1 bg-zinc-900/80 p-0.5 rounded border border-zinc-800">
+                      {artifact.files.map((file, idx) => (
+                        <button
+                          key={file.name}
+                          onClick={() => setSelectedFileIndex(idx)}
+                          className={`px-2 py-0.5 text-xs font-mono rounded transition-colors ${
+                            selectedFileIndex === idx
+                              ? 'bg-zinc-800 text-zinc-100 font-semibold'
+                              : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                          }`}
+                        >
+                          {file.name}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-xs font-mono text-zinc-300 font-medium truncate">
+                      {activeFile.name}
+                    </span>
+                  )}
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 shrink-0">
                     {activeFile.content.split('\n').length} lines
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     onClick={handleCopy}
                     className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-200 transition-colors"
@@ -253,28 +278,59 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
                   <Layers size={13} className="text-purple-400" />
                   <span>Contract Interface</span>
                 </div>
-                <div className="space-y-1.5 font-mono text-[10px]">
-                  <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                    <span className="text-zinc-400">Function</span>
-                    <span className="text-cyan-300">ShaderGraphSurface_float</span>
+                {selectedTarget === 'unreal-material' ? (
+                  <div className="space-y-1.5 font-mono text-[10px]">
+                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                      <span className="text-zinc-400">Node Type</span>
+                      <span className="text-cyan-300">Custom (Material Expression)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                      <span className="text-zinc-400">Output Type</span>
+                      <span className="text-cyan-300">CMOT Float3 (BaseColor)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                      <span className="text-zinc-400">Input 0: UV</span>
+                      <span className="text-zinc-200">float2 (TexCoord 0)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                      <span className="text-zinc-400">Input 1: Time</span>
+                      <span className="text-zinc-200">float (Time node)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                      <span className="text-zinc-400">Additional Output</span>
+                      <span className="text-amber-300">Alpha (CMOT Float1)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5">
+                      <span className="text-zinc-400">Material Pin</span>
+                      <span className="text-amber-300">Emissive Color (Unlit)</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                    <span className="text-zinc-400">Input: UV</span>
-                    <span className="text-zinc-200">float2 (Primary UV0)</span>
+                ) : (
+                  <div className="space-y-1.5 font-mono text-[10px]">
+                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                      <span className="text-zinc-400">Function</span>
+                      <span className="text-cyan-300">
+                        {selectedTarget === 'webgl-glsl' ? 'void main()' : 'ShaderGraphSurface_float'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                      <span className="text-zinc-400">Input: UV</span>
+                      <span className="text-zinc-200">float2 (Primary UV0)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                      <span className="text-zinc-400">Input: Time</span>
+                      <span className="text-zinc-200">float (Time node)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
+                      <span className="text-zinc-400">Output: BaseColor</span>
+                      <span className="text-amber-300">float3 (Master RGB)</span>
+                    </div>
+                    <div className="flex justify-between py-0.5">
+                      <span className="text-zinc-400">Output: Alpha</span>
+                      <span className="text-amber-300">float (Master Alpha)</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                    <span className="text-zinc-400">Input: Time</span>
-                    <span className="text-zinc-200">float (Time node)</span>
-                  </div>
-                  <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
-                    <span className="text-zinc-400">Output: BaseColor</span>
-                    <span className="text-amber-300">float3 (Master RGB)</span>
-                  </div>
-                  <div className="flex justify-between py-0.5">
-                    <span className="text-zinc-400">Output: Alpha</span>
-                    <span className="text-amber-300">float (Master Alpha)</span>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Limitations and Warnings Box */}

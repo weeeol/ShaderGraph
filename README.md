@@ -45,12 +45,13 @@ Construct complex GLSL fragment shaders through a node-based DAG (Directed Acycl
 - **Texture Baking**: Bake procedural shaders into high-resolution PNG image textures via off-screen WebGL rendering.
 - **Keyboard Shortcuts & Quick Guide**: Integrated reference overlay detailing node types, connection tips, and editor shortcuts.
 
-### Engine Export: Unity URP & HDRP
-- **Portable Unlit Surface Contract**: Compiles the graph into a typed intermediate representation (`ShaderIR`) and lowers it into clean, target-specific HLSL (`.hlsl`).
-- **Unity Shader Graph Custom Function**: Direct support for Unity's File-mode Custom Function node via the standard `void ShaderGraphSurface_float(float2 UV, float Time, out float3 BaseColor, out float Alpha)` signature.
-- **Deterministic Include Guards**: Generates `//UNITY_SHADER_NO_UPGRADE` and `#ifndef SHADERGRAPH_<NAME>_INCLUDED` guards preventing symbol collision and automatic migration errors.
-- **Pipeline Profiles**: Select between **Unity URP**, **Unity HDRP**, and **WebGL2 GLSL** with dedicated setup instructions and limitation warnings.
-- **Instant Download & Copy**: Download `.hlsl` files directly into your Unity project's `Assets/` directory or copy the code to clipboard.
+### Engine Export: Unity URP/HDRP & Unreal Engine
+- **Portable Unlit Surface Contract**: Compiles the graph into a typed intermediate representation (`ShaderIR`) and lowers it into clean, target-specific HLSL and GLSL code.
+- **Unity Shader Graph Custom Function**: Direct support for Unity's File-mode Custom Function node via the standard `void ShaderGraphSurface_float(float2 UV, float Time, out float3 BaseColor, out float Alpha)` signature with deterministic include guards.
+- **Unreal Engine Custom Material Expression**: Paste-ready HLSL code body and step-by-step setup guide for Unreal Engine 4 and 5 Material Editor. Configures `CMOT Float3` output (`BaseColor`), `UV` and `Time` inputs, and additional `Alpha` output (`CMOT Float1`) connected to Unlit `Emissive Color` and `Opacity`.
+- **Function-Local Procedural Libraries**: Procedural 2D Simplex Noise and Voronoi noise encapsulated in local helper structs (`UE_Helpers`) for safe execution inside Unreal's Custom expression function scope.
+- **Pipeline Profiles & Setup Guides**: Select between **Unity URP**, **Unity HDRP**, **Unreal Engine**, and **WebGL2 GLSL** with step-by-step wiring instructions, contract interface mappings, and limitation warnings.
+- **Instant Download & Copy**: Download source files directly (`.hlsl`, `.hlsl.txt`, `.md`, `.glsl`) or copy the code to clipboard with 1-click feedback.
 
 ---
 
