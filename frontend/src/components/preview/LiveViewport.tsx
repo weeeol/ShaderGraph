@@ -110,13 +110,17 @@ const ShaderMesh = ({
 };
 
 const StatsTracker = ({ onUpdate }: { onUpdate: (stats: ViewportStats) => void }) => {
-  const lastTimeRef = useRef(performance.now());
+  const lastTimeRef = useRef<number | null>(null);
   const framesRef = useRef(0);
   const fpsRef = useRef(60);
 
   useFrame(({ gl, clock }) => {
     framesRef.current++;
     const now = performance.now();
+    if (lastTimeRef.current === null) {
+      lastTimeRef.current = now;
+      return;
+    }
     if (now - lastTimeRef.current >= 200) {
       fpsRef.current = Math.round((framesRef.current * 1000) / (now - lastTimeRef.current));
       framesRef.current = 0;
@@ -134,7 +138,7 @@ const StatsTracker = ({ onUpdate }: { onUpdate: (stats: ViewportStats) => void }
   return null;
 };
 
-const GEO_OPTIONS: Array<{ id: GeometryType; label: string }> = [
+const GEO_OPTIONS: { id: GeometryType; label: string }[] = [
   { id: 'box', label: 'Cube' },
   { id: 'sphere', label: 'Sphere' },
   { id: 'plane', label: 'Plane' },
@@ -195,11 +199,11 @@ export const LiveViewport = () => {
   const currentGeoLabel = GEO_OPTIONS.find(g => g.id === geometry)?.label || 'Cube';
 
   return (
-    <div className="h-full w-full flex flex-col relative overflow-hidden bg-zinc-950">
+    <div className="h-full w-full flex flex-col relative overflow-hidden bg-zinc-950 select-none">
       {/* Viewport Toolbar */}
-      <div className="px-3.5 py-2 bg-zinc-950 border-b border-zinc-800/80 flex items-center justify-between shrink-0 z-10">
+      <div className="h-9 px-3 bg-zinc-950 border-b border-zinc-800/80 flex items-center justify-between shrink-0 z-10">
         <div className="flex items-center gap-2 shrink-0">
-          <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider whitespace-nowrap">3D Viewport</h3>
+          <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider font-mono">3D Viewport</h3>
         </div>
 
         {/* Viewport Actions & Switchers */}
@@ -208,11 +212,11 @@ export const LiveViewport = () => {
           <div className="relative">
             <button
               onClick={() => setIsGeoMenuOpen(!isGeoMenuOpen)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-medium text-zinc-200 transition-colors"
+              className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 hover:border-zinc-700 text-xs font-mono text-zinc-200 transition-colors"
               title="Change 3D Geometry"
             >
               <span>{currentGeoLabel}</span>
-              <ChevronDown size={12} className="text-zinc-500" />
+              <ChevronDown size={11} className="text-zinc-500" />
             </button>
 
             {isGeoMenuOpen && (
@@ -243,15 +247,15 @@ export const LiveViewport = () => {
             )}
           </div>
 
-          <div className="w-px h-4 bg-zinc-800 mx-0.5" />
+          <div className="w-px h-3.5 bg-zinc-800/80 mx-0.5" />
 
           {/* Wireframe Toggle */}
           <button
             onClick={() => setShowWireframe(!showWireframe)}
-            className={`p-1.5 rounded-md border text-xs transition-colors ${
+            className={`p-1 rounded border text-xs transition-colors ${
               showWireframe
                 ? 'bg-sky-950/60 border-sky-600/70 text-sky-300'
-                : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+                : 'bg-zinc-900/80 border-zinc-800/80 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
             }`}
             title={showWireframe ? "Disable Wireframe Overlay" : "Enable Wireframe Overlay"}
           >
@@ -261,7 +265,7 @@ export const LiveViewport = () => {
           {/* Background Mode Switcher */}
           <button
             onClick={cycleBackground}
-            className="p-1.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 text-xs transition-colors"
+            className="p-1 rounded bg-zinc-900/80 border border-zinc-800/80 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 text-xs transition-colors"
             title={`Background Mode: ${backgroundType.toUpperCase()} (Click to cycle)`}
           >
             <Layers size={13} />
@@ -270,10 +274,10 @@ export const LiveViewport = () => {
           {/* Stats Toggle Button */}
           <button
             onClick={() => setShowStats(!showStats)}
-            className={`p-1.5 rounded-md border text-xs transition-colors ${
+            className={`p-1 rounded border text-xs transition-colors ${
               showStats
-                ? 'bg-emerald-950/40 border-emerald-700/60 text-emerald-400'
-                : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+                ? 'bg-emerald-950/50 border-emerald-700/60 text-emerald-400'
+                : 'bg-zinc-900/80 border-zinc-800/80 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
             }`}
             title={showStats ? "Hide Performance HUD" : "Show Performance HUD"}
           >

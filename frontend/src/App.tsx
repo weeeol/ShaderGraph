@@ -48,7 +48,7 @@ function ShaderGraph() {
 
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition, fitView } = useReactFlow();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
   const [isDockOpen, setIsDockOpen] = useState(true);
   const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(true);
   const [isIntroOpen, setIsIntroOpen] = useState(false);
@@ -216,7 +216,7 @@ function ShaderGraph() {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Left Sidebar */}
         {isSidebarOpen && (
-          <div className="w-60 h-full shrink-0 z-10 transition-all duration-200 relative">
+          <div className="w-52 sm:w-56 lg:w-60 h-full shrink-0 z-10 transition-all duration-200 relative">
             <Sidebar />
           </div>
         )}
@@ -259,11 +259,11 @@ function ShaderGraph() {
 
         {/* Right Dock */}
         {isDockOpen && (
-          <div className="w-[470px] h-full flex flex-col shrink-0 z-10 border-l border-zinc-800/80 bg-zinc-950 transition-all duration-200">
-            <div className="h-[390px] shrink-0 border-b border-zinc-800/80">
+          <div className="w-[320px] sm:w-[380px] lg:w-[430px] xl:w-[470px] h-full flex flex-col shrink-0 z-10 border-l border-zinc-800/80 bg-zinc-950 transition-all duration-200">
+            <div className="h-[330px] lg:h-[390px] shrink-0 border-b border-zinc-800/80">
               <LiveViewport />
             </div>
-            <div className="flex-1 min-h-[200px]">
+            <div className="flex-1 min-h-[180px]">
               <GLSLViewer />
             </div>
           </div>

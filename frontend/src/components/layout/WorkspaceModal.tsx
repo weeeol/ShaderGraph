@@ -37,7 +37,7 @@ export const WorkspaceModal = ({ isOpen, onClose, onNewBlankGraph, onGraphLoaded
   } = useGraphStore();
 
   const [activeTab, setActiveTab] = useState<'templates' | 'saved'>('templates');
-  const [saveName, setSaveName] = useState(currentGraphName);
+  const [saveName, setSaveName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,9 +45,17 @@ export const WorkspaceModal = ({ isOpen, onClose, onNewBlankGraph, onGraphLoaded
   useEffect(() => {
     if (isOpen) {
       loadSavedGraphsList();
+    }
+  }, [isOpen, loadSavedGraphsList]);
+
+  // Sync save name with currentGraphName when opening
+  const prevIsOpenRef = useRef(isOpen);
+  useEffect(() => {
+    if (isOpen && !prevIsOpenRef.current) {
       setSaveName(currentGraphName);
     }
-  }, [isOpen, currentGraphName, loadSavedGraphsList]);
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, currentGraphName]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -316,46 +324,46 @@ export const WorkspaceModal = ({ isOpen, onClose, onNewBlankGraph, onGraphLoaded
           </div>
 
           {/* Main Body */}
-          <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
             {activeTab === 'templates' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {SAMPLE_GRAPHS.map((sample) => (
                   <div 
                     key={sample.id}
-                    className="bg-zinc-900/40 hover:bg-zinc-900/80 border border-zinc-800 rounded-xl p-5 flex flex-col justify-between transition-all duration-200 group"
+                    className="bg-zinc-900/50 hover:bg-zinc-900/90 border border-zinc-800/90 hover:border-zinc-700/90 rounded-lg p-4 flex flex-col justify-between transition-all duration-150 group"
                   >
                     <div>
                       {/* Card Top Title & Specs */}
-                      <div className="flex items-start justify-between gap-2 pb-3 border-b border-zinc-800/60">
+                      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-zinc-800/70">
                         <div>
-                          <h3 className="text-base font-bold text-zinc-100 group-hover:text-white transition-colors">
+                          <h3 className="text-sm font-bold text-zinc-100 group-hover:text-white transition-colors">
                             {sample.name}
                           </h3>
-                          <span className="text-[11px] font-mono text-zinc-400 mt-0.5 block">
+                          <span className="text-[10.5px] font-mono text-zinc-500 mt-0.5 block">
                             GLSL 3.0 ES
                           </span>
                         </div>
-                        <span className="text-xs font-mono text-zinc-300 bg-zinc-800/90 px-2 py-0.5 rounded shrink-0">
+                        <span className="text-[11px] font-mono text-zinc-300 bg-zinc-800/90 px-2 py-0.5 rounded shrink-0">
                           {sample.nodes.length} nodes
                         </span>
                       </div>
 
                       {/* Technical Description */}
-                      <p className="text-xs text-zinc-400 leading-relaxed my-4">
+                      <p className="text-xs text-zinc-400 leading-relaxed my-3">
                         {sample.description}
                       </p>
 
                       {/* Node Pipeline Flow Chain */}
-                      <div className="mb-4">
-                        <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block mb-1.5">Data Pipeline</span>
-                        <div className="bg-zinc-950 border border-zinc-800/80 rounded-lg p-2.5 text-[11px] font-mono text-zinc-300 flex flex-wrap items-center gap-1.5">
+                      <div className="mb-3">
+                        <span className="text-[9.5px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">Data Pipeline</span>
+                        <div className="bg-zinc-950/80 border border-zinc-800/80 rounded p-2 text-[10.5px] font-mono text-zinc-300 flex flex-wrap items-center gap-1.5">
                           {sample.pipeline.map((step, idx) => (
                             <span key={step} className="flex items-center gap-1.5">
                               <span className={idx === sample.pipeline.length - 1 ? 'text-zinc-100 font-semibold' : 'text-zinc-400'}>
                                 {step}
                               </span>
                               {idx < sample.pipeline.length - 1 && (
-                                <ChevronRight size={12} className="text-zinc-600 shrink-0" />
+                                <ChevronRight size={11} className="text-zinc-600 shrink-0" />
                               )}
                             </span>
                           ))}
@@ -363,9 +371,9 @@ export const WorkspaceModal = ({ isOpen, onClose, onNewBlankGraph, onGraphLoaded
                       </div>
 
                       {/* Tech Tags */}
-                      <div className="flex flex-wrap gap-1.5 mb-6">
+                      <div className="flex flex-wrap gap-1 mb-5">
                         {sample.tags.map(tag => (
-                          <span key={tag} className="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                          <span key={tag} className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
                             {tag}
                           </span>
                         ))}
@@ -375,10 +383,10 @@ export const WorkspaceModal = ({ isOpen, onClose, onNewBlankGraph, onGraphLoaded
                     {/* Open Action */}
                     <button
                       onClick={() => handleLoadSample(sample)}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-zinc-800 hover:bg-zinc-200 text-zinc-200 hover:text-zinc-950 font-semibold text-xs rounded-lg transition-all"
+                      className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-zinc-800/80 hover:bg-zinc-100 text-zinc-200 hover:text-zinc-950 font-medium text-xs rounded transition-all active:scale-[0.99]"
                     >
                       <span>Load Template</span>
-                      <ArrowUpRight size={14} />
+                      <ArrowUpRight size={13} />
                     </button>
                   </div>
                 ))}

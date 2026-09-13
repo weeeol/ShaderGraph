@@ -81,19 +81,13 @@ export const QuickSearchModal = ({
     });
   }, [availableNodes, query]);
 
-  // Reset selection index when query changes
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [query]);
-
   // Focus input when opened
   useEffect(() => {
     if (isOpen) {
-      setQuery('');
-      setSelectedIndex(0);
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
@@ -166,19 +160,25 @@ export const QuickSearchModal = ({
         onKeyDown={handleKeyDown}
       >
         {/* Search Header */}
-        <div className="p-2.5 border-b border-zinc-800 flex items-center gap-2 bg-zinc-950/60">
-          <Search size={15} className="text-zinc-400 shrink-0 ml-1" />
+        <div className="p-2 border-b border-zinc-800 flex items-center gap-2 bg-zinc-950/70">
+          <Search size={14} className="text-zinc-500 shrink-0 ml-1" />
           <input 
             ref={inputRef}
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setSelectedIndex(0);
+            }}
             placeholder="Type node name (Tab / Enter)..."
             className="flex-1 bg-transparent text-xs text-zinc-100 font-mono placeholder:text-zinc-500 focus:outline-none"
           />
           {query && (
             <button 
-              onClick={() => setQuery('')}
+              onClick={() => {
+                setQuery('');
+                setSelectedIndex(0);
+              }}
               className="text-zinc-500 hover:text-zinc-300 p-0.5"
             >
               <X size={13} />

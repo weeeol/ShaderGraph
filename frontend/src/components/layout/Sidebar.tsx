@@ -48,11 +48,11 @@ export const Sidebar = () => {
     : availableNodes;
 
   return (
-    <div className="w-full bg-zinc-950 border-r border-zinc-800/80 flex flex-col h-full shrink-0 z-10">
+    <div className="w-full bg-zinc-950 border-r border-zinc-800/80 flex flex-col h-full shrink-0 z-10 select-none">
       {/* Palette Header & Search */}
-      <div className="p-3.5 border-b border-zinc-800/80 bg-zinc-900/30 shrink-0">
-        <div className="flex items-center justify-between mb-2.5">
-          <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+      <div className="p-2.5 border-b border-zinc-800/80 bg-zinc-900/40 shrink-0">
+        <div className="flex items-center justify-between mb-2 px-0.5">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-300 font-mono">
             Node Library
           </span>
           <span className="text-[10px] font-mono text-zinc-500">
@@ -61,41 +61,47 @@ export const Sidebar = () => {
         </div>
 
         <div className="relative">
-          <Search size={14} className="absolute left-2.5 top-2.5 text-zinc-500" />
+          <Search size={13} className="absolute left-2.5 top-2.5 text-zinc-500 pointer-events-none" />
           <input 
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search nodes..."
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-1.5 pl-8 pr-7 text-xs text-zinc-200 focus:outline-none focus:border-zinc-600 transition-colors font-mono placeholder:text-zinc-600"
+            className="w-full bg-zinc-900 border border-zinc-800 rounded-md py-1.5 pl-8 pr-7 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600/50 transition-colors font-mono"
           />
           {search && (
             <button 
               onClick={() => setSearch('')}
-              className="absolute right-2 top-2 text-zinc-500 hover:text-zinc-300"
+              className="absolute right-2 top-2 text-zinc-500 hover:text-zinc-300 p-0.5"
+              title="Clear search"
             >
-              <X size={13} />
+              <X size={12} />
             </button>
           )}
         </div>
       </div>
 
       {/* Nodes List */}
-      <div className="flex-1 overflow-y-auto p-3.5 flex flex-col gap-4 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-2.5 flex flex-col gap-3.5 custom-scrollbar">
         {Object.entries(CATEGORY_CONFIG).map(([category, config]) => {
           const categoryNodes = filteredNodes.filter(n => config.types.includes(n.type));
           if (categoryNodes.length === 0) return null;
 
           return (
-            <div key={category}>
-              <div className="flex items-center gap-1.5 mb-1.5 px-1">
-                <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
-                <h3 className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider font-mono">
-                  {category}
-                </h3>
+            <div key={category} className="flex flex-col gap-1">
+              <div className="flex items-center justify-between px-1 py-0.5 border-b border-zinc-800/50 mb-0.5">
+                <div className="flex items-center gap-1.5">
+                  <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
+                  <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">
+                    {category}
+                  </h3>
+                </div>
+                <span className="text-[9px] font-mono text-zinc-600">
+                  {categoryNodes.length}
+                </span>
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-0.5">
                 {categoryNodes.map(node => {
                   const mainOutput = node.outputs[0]?.type || '';
                   return (
@@ -103,14 +109,14 @@ export const Sidebar = () => {
                       key={node.id}
                       draggable
                       onDragStart={(e) => onDragStart(e, node.type)}
-                      className="bg-zinc-900/60 hover:bg-zinc-800/90 border border-zinc-800/70 hover:border-zinc-700 rounded-md px-2.5 py-1.5 text-xs font-medium text-zinc-200 cursor-grab active:cursor-grabbing flex items-center justify-between transition-colors group select-none"
+                      className="px-2 py-1.5 rounded text-xs font-medium text-zinc-300 hover:text-zinc-100 hover:bg-zinc-900/90 border border-transparent hover:border-zinc-800/80 cursor-grab active:cursor-grabbing flex items-center justify-between transition-colors group select-none"
                     >
-                      <div className="flex items-center gap-1.5">
-                        <GripVertical size={13} className="text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
-                        <span>{node.name}</span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <GripVertical size={12} className="text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />
+                        <span className="truncate text-xs">{node.name}</span>
                       </div>
                       {mainOutput && (
-                        <span className="text-[10px] font-mono text-zinc-500 uppercase shrink-0">
+                        <span className="text-[9.5px] font-mono text-zinc-500 group-hover:text-zinc-400 px-1 py-0.2 rounded bg-zinc-900/60 border border-zinc-800/60 uppercase shrink-0 ml-1">
                           {mainOutput}
                         </span>
                       )}
@@ -123,8 +129,16 @@ export const Sidebar = () => {
         })}
 
         {filteredNodes.length === 0 && (
-          <div className="text-center py-8 text-xs text-zinc-500">
-            No matching nodes for "{search}"
+          <div className="text-center py-10 px-2 flex flex-col items-center gap-2">
+            <span className="text-xs text-zinc-500 font-mono">
+              No matching nodes for "{search}"
+            </span>
+            <button
+              onClick={() => setSearch('')}
+              className="text-[11px] text-zinc-400 hover:text-zinc-200 underline font-mono cursor-pointer"
+            >
+              Clear filter
+            </button>
           </div>
         )}
       </div>
