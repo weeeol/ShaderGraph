@@ -15,6 +15,7 @@ import { CustomNode } from './components/graph/CustomNode';
 import { Header } from './components/layout/Header';
 import { IntroModal } from './components/layout/IntroModal';
 import { WorkspaceModal } from './components/layout/WorkspaceModal';
+import { ExportModal } from './components/layout/ExportModal';
 import { QuickSearchModal } from './components/graph/QuickSearchModal';
 import { LiveViewport } from './components/preview/LiveViewport';
 import { GLSLViewer } from './components/preview/GLSLViewer';
@@ -52,6 +53,7 @@ function ShaderGraph() {
   const [isDockOpen, setIsDockOpen] = useState(true);
   const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(true);
   const [isIntroOpen, setIsIntroOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchPosition, setSearchPosition] = useState<{ x: number; y: number } | null>(null);
 
@@ -207,6 +209,7 @@ function ShaderGraph() {
         toggleDock={() => setIsDockOpen(!isDockOpen)}
         onOpenIntro={() => setIsIntroOpen(true)}
         onOpenWorkspace={() => setIsWorkspaceOpen(true)}
+        onOpenExport={() => setIsExportOpen(true)}
         onOpenQuickSearch={() => {
           setSearchPosition({ ...mousePositionRef.current });
           setIsSearchOpen(true);
@@ -293,6 +296,12 @@ function ShaderGraph() {
           setIsIntroOpen(true);
         }}
         onGraphLoaded={handleGraphLoaded}
+      />
+
+      {/* Engine Exporter Dialog */}
+      <ExportModal 
+        isOpen={isExportOpen} 
+        onClose={() => setIsExportOpen(false)} 
       />
     </div>
   );

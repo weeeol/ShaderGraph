@@ -12,7 +12,8 @@ import {
   Moon, 
   Undo2, 
   Redo2, 
-  Plus 
+  Plus,
+  FileCode2
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -23,6 +24,7 @@ interface HeaderProps {
   onOpenIntro?: () => void;
   onOpenWorkspace?: () => void;
   onOpenQuickSearch?: () => void;
+  onOpenExport?: () => void;
 }
 
 export const Header = ({ 
@@ -32,7 +34,8 @@ export const Header = ({
   toggleDock, 
   onOpenIntro, 
   onOpenWorkspace,
-  onOpenQuickSearch 
+  onOpenQuickSearch,
+  onOpenExport
 }: HeaderProps) => {
   const { 
     compilerError, 
@@ -165,8 +168,21 @@ export const Header = ({
           title="Bake procedural texture to 1024x1024 PNG"
         >
           <Download size={13} className="text-zinc-400 shrink-0" />
-          <span className="hidden sm:inline">Export</span>
+          <span className="hidden sm:inline">Bake PNG</span>
         </button>
+
+        {/* Engine Export (Unity / WebGL) */}
+        {onOpenExport && (
+          <button
+            onClick={onOpenExport}
+            disabled={!!compilerError}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-zinc-900/70 hover:bg-zinc-800/80 border border-zinc-800/80 hover:border-zinc-700 text-zinc-300 hover:text-zinc-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            title="Export engine shader (Unity URP/HDRP, WebGL)"
+          >
+            <FileCode2 size={13} className="text-zinc-400 shrink-0" />
+            <span className="hidden sm:inline">Export</span>
+          </button>
+        )}
 
         {/* Compile - The Singular Primary Action */}
         <button 

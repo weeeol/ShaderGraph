@@ -45,6 +45,13 @@ Construct complex GLSL fragment shaders through a node-based DAG (Directed Acycl
 - **Texture Baking**: Bake procedural shaders into high-resolution PNG image textures via off-screen WebGL rendering.
 - **Keyboard Shortcuts & Quick Guide**: Integrated reference overlay detailing node types, connection tips, and editor shortcuts.
 
+### Engine Export: Unity URP & HDRP
+- **Portable Unlit Surface Contract**: Compiles the graph into a typed intermediate representation (`ShaderIR`) and lowers it into clean, target-specific HLSL (`.hlsl`).
+- **Unity Shader Graph Custom Function**: Direct support for Unity's File-mode Custom Function node via the standard `void ShaderGraphSurface_float(float2 UV, float Time, out float3 BaseColor, out float Alpha)` signature.
+- **Deterministic Include Guards**: Generates `//UNITY_SHADER_NO_UPGRADE` and `#ifndef SHADERGRAPH_<NAME>_INCLUDED` guards preventing symbol collision and automatic migration errors.
+- **Pipeline Profiles**: Select between **Unity URP**, **Unity HDRP**, and **WebGL2 GLSL** with dedicated setup instructions and limitation warnings.
+- **Instant Download & Copy**: Download `.hlsl` files directly into your Unity project's `Assets/` directory or copy the code to clipboard.
+
 ---
 
 ## Tech Stack
