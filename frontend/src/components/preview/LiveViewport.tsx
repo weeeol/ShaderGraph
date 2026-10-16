@@ -151,7 +151,7 @@ export const LiveViewport = () => {
   const [isGeoMenuOpen, setIsGeoMenuOpen] = useState(false);
   const [showWireframe, setShowWireframe] = useState(false);
   const [backgroundType, setBackgroundType] = useState<BackgroundType>('studio');
-  const [showStats, setShowStats] = useState(true);
+  const [showStats, setShowStats] = useState(false);
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
   const [stats, setStats] = useState<ViewportStats>({
     fps: 60,

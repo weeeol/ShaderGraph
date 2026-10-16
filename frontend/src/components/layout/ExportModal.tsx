@@ -107,30 +107,27 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-xs select-none"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-8 bg-black/75 backdrop-blur-xs select-none"
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-5xl h-[88vh] max-h-[820px] bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl flex flex-col overflow-hidden text-zinc-100"
+        className="w-full max-w-6xl h-[92vh] max-h-[900px] bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl flex flex-col overflow-hidden text-zinc-100"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/80 bg-zinc-900/60 shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800/80 bg-zinc-900/60 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="p-1.5 rounded-md bg-zinc-800 border border-zinc-700/80 text-zinc-200">
               <FileCode2 size={16} />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold tracking-tight text-zinc-100">
+              <div className="flex items-center gap-3">
+                <h2 className="text-base font-semibold tracking-tight text-zinc-100">
                   Export Engine Shader
                 </h2>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
-                  Unlit Surface Contract
-                </span>
               </div>
-              <p className="text-[11px] text-zinc-400">
-                Target-neutral shader compilation into portable engine code
+              <p className="text-xs text-zinc-400 mt-1">
+                Choose a target, review the generated files, then copy or download them.
               </p>
             </div>
           </div>
@@ -149,8 +146,8 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
         </div>
 
         {/* Target Profile Selector Tabs */}
-        <div className="flex items-center gap-1 px-4 py-2 bg-zinc-950 border-b border-zinc-800/60 shrink-0 overflow-x-auto custom-scrollbar">
-          <span className="text-[11px] font-medium text-zinc-400 mr-2 shrink-0">Target Profile:</span>
+        <div className="flex items-center gap-2 px-5 py-3 bg-zinc-950 border-b border-zinc-800/60 shrink-0 overflow-x-auto custom-scrollbar">
+          <span className="text-xs font-medium text-zinc-400 mr-2 shrink-0">Target</span>
           {AVAILABLE_TARGETS.map(target => {
             const exp = EXPORTER_REGISTRY[target];
             const isSelected = selectedTarget === target;
@@ -189,7 +186,7 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
             {/* Left: Code Viewer */}
             <div className="flex-1 flex flex-col min-w-0 border-b lg:border-b-0 lg:border-r border-zinc-800/80 bg-zinc-950/80">
               {/* File Meta Toolbar */}
-              <div className="flex items-center justify-between px-3 py-2 bg-zinc-900/40 border-b border-zinc-800/60 shrink-0 gap-2">
+              <div className="flex items-center justify-between px-4 py-3 bg-zinc-900/40 border-b border-zinc-800/60 shrink-0 gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   {artifact.files.length > 1 ? (
                     <div className="flex items-center gap-1 bg-zinc-900/80 p-0.5 rounded border border-zinc-800">
@@ -248,7 +245,7 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
               </div>
 
               {/* Monospace Code Display */}
-              <div className="flex-1 overflow-auto p-3 font-mono text-[11px] leading-relaxed text-zinc-300 select-text custom-scrollbar">
+              <div className="flex-1 overflow-auto p-5 font-mono text-[11px] leading-relaxed text-zinc-300 select-text custom-scrollbar">
                 <pre className="whitespace-pre">
                   {activeFile.content}
                 </pre>
@@ -256,17 +253,23 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
             </div>
 
             {/* Right: Integration Instructions & Warnings */}
-            <div className="w-full lg:w-[380px] shrink-0 flex flex-col bg-zinc-900/30 overflow-y-auto custom-scrollbar p-4 space-y-4">
+            <div className="w-full lg:w-[420px] shrink-0 flex flex-col bg-zinc-900/30 overflow-y-auto custom-scrollbar p-6 space-y-6">
               {/* Instructions Box */}
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-200 mb-2.5">
+                <div className="flex items-center gap-1.5 text-sm font-semibold text-zinc-200 mb-2">
                   <BookOpen size={13} className="text-cyan-400" />
-                  <span>Integration Instructions</span>
+                  <span>Integration steps</span>
                 </div>
-                <ol className="space-y-2 text-[11px] text-zinc-300 list-decimal list-inside">
+                <p className="text-xs leading-relaxed text-zinc-400 mb-4">
+                  Follow these target-specific steps to place the generated shader in your project.
+                </p>
+                <ol className="space-y-3 text-xs text-zinc-300">
                   {artifact.instructions.map((step, idx) => (
-                    <li key={idx} className="leading-snug">
-                      <span className="text-zinc-300">{step}</span>
+                    <li key={idx} className="flex items-start gap-3 leading-relaxed">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded border border-zinc-700 bg-zinc-900 font-mono text-[10px] text-zinc-400">
+                        {idx + 1}
+                      </span>
+                      <span className="pt-0.5">{step}</span>
                     </li>
                   ))}
                 </ol>
@@ -274,12 +277,12 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
 
               {/* Surface Contract Summary */}
               <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-[11px]">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-200 mb-2">
+                <div className="flex items-center gap-1.5 text-sm font-semibold text-zinc-200 mb-3">
                   <Layers size={13} className="text-purple-400" />
                   <span>Contract Interface</span>
                 </div>
                 {selectedTarget === 'unreal-material' ? (
-                  <div className="space-y-1.5 font-mono text-[10px]">
+                  <div className="space-y-2 font-mono text-[10px]">
                     <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                       <span className="text-zinc-400">Node Type</span>
                       <span className="text-cyan-300">Custom (Material Expression)</span>
@@ -306,7 +309,7 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-1.5 font-mono text-[10px]">
+                  <div className="space-y-2 font-mono text-[10px]">
                     <div className="flex justify-between py-0.5 border-b border-zinc-800/60">
                       <span className="text-zinc-400">Function</span>
                       <span className="text-cyan-300">
@@ -335,11 +338,11 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
 
               {/* Limitations and Warnings Box */}
               <div>
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-300 mb-2">
+                <div className="flex items-center gap-1.5 text-sm font-semibold text-amber-300 mb-3">
                   <AlertTriangle size={13} />
                   <span>Scope & Limitations</span>
                 </div>
-                <div className="p-2.5 rounded-lg bg-amber-950/20 border border-amber-800/40 text-[11px] text-amber-200/80 space-y-1.5">
+                <div className="p-3 rounded-lg bg-amber-950/20 border border-amber-800/40 text-xs text-amber-200/80 space-y-2 leading-relaxed">
                   {artifact.warnings.map((warn, idx) => (
                     <div key={idx} className="flex items-start gap-1.5 leading-snug">
                       <span className="text-amber-400 font-bold shrink-0">•</span>
@@ -350,7 +353,7 @@ export const ExportModal = ({ isOpen, onClose }: ExportModalProps) => {
               </div>
 
               {/* Ready Indicator */}
-              <div className="flex items-center gap-2 p-2 rounded-md bg-emerald-950/30 border border-emerald-800/40 text-[11px] text-emerald-300">
+              <div className="flex items-center gap-2 p-3 rounded-md bg-emerald-950/30 border border-emerald-800/40 text-xs text-emerald-300 leading-relaxed">
                 <CheckCircle2 size={14} className="shrink-0 text-emerald-400" />
                 <span>Deterministic export verified against portable Unlit IR.</span>
               </div>
