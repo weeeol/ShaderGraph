@@ -201,9 +201,9 @@ export const LiveViewport = () => {
   return (
     <div className="h-full w-full flex flex-col relative overflow-hidden bg-zinc-950 select-none">
       {/* Viewport Toolbar */}
-      <div className="h-9 px-3 bg-zinc-950 border-b border-zinc-800/80 flex items-center justify-between shrink-0 z-10">
+      <div className="h-11 px-4 bg-zinc-900 border-b border-zinc-800/80 flex items-center justify-between shrink-0 z-10">
         <div className="flex items-center gap-2 shrink-0">
-          <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider font-mono">3D Viewport</h3>
+          <h3 className="text-xs font-semibold text-zinc-200 tracking-tight">3D viewport</h3>
         </div>
 
         {/* Viewport Actions & Switchers */}

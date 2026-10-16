@@ -25,11 +25,11 @@ export const GLSLViewer = () => {
   return (
     <div className="h-full flex flex-col overflow-hidden bg-zinc-950 select-none">
       {/* Studio Header */}
-      <div className="h-9 px-3 border-b border-zinc-800/80 bg-zinc-950 flex justify-between items-center shrink-0">
+      <div className="h-11 px-4 border-b border-zinc-800/80 bg-zinc-900 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-2">
           <Terminal size={13} className="text-zinc-400" />
-          <h3 className="text-xs font-semibold text-zinc-200 uppercase tracking-wider font-mono">
-            GLSL Source
+          <h3 className="text-xs font-semibold text-zinc-200 tracking-tight">
+            Shader source
           </h3>
           <span className="text-[9.5px] font-mono px-1 py-0.2 rounded bg-zinc-900/80 border border-zinc-800/80 text-zinc-500">
             {lines.length} lines

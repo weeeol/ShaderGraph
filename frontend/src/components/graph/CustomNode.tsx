@@ -172,14 +172,14 @@ export const CustomNode = memo(({ id, type, data, selected }: NodeProps) => {
 
   return (
     <div 
-      className={`min-w-[195px] bg-zinc-900 border rounded-lg shadow-lg flex flex-col transition-all duration-150 ${
+      className={`min-w-[195px] bg-zinc-900 border rounded-md shadow-md flex flex-col transition-all duration-150 ${
         selected 
           ? 'border-zinc-300 ring-1 ring-zinc-300/40 shadow-xl' 
           : 'border-zinc-800 hover:border-zinc-700/80'
       }`}
     >
       {/* Node Header */}
-      <div className={`px-3 py-1.5 bg-zinc-950 border-b flex items-center justify-between rounded-t-lg ${category.headerBorder}`}>
+      <div className={`px-3 py-2 bg-zinc-950 border-b flex items-center justify-between rounded-t-md ${category.headerBorder}`}>
         <div className="flex items-center gap-2 min-w-0">
           <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${category.dot}`} />
           <span className="font-semibold text-xs text-zinc-100 tracking-tight truncate">{def.name}</span>

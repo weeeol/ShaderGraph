@@ -201,7 +201,7 @@ function ShaderGraph() {
   };
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-primary overflow-hidden text-text selection:bg-accent/30">
+    <div className="notion-shell w-screen h-screen flex flex-col bg-primary overflow-hidden text-text selection:bg-accent/30">
       <Header 
         isSidebarOpen={isSidebarOpen} 
         isDockOpen={isDockOpen} 
@@ -219,7 +219,7 @@ function ShaderGraph() {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Left Sidebar */}
         {isSidebarOpen && (
-          <div className="w-52 sm:w-56 lg:w-60 h-full shrink-0 z-10 transition-all duration-200 relative">
+          <div className="w-60 sm:w-64 lg:w-68 h-full shrink-0 z-10 transition-all duration-200 relative">
             <Sidebar />
           </div>
         )}
@@ -244,7 +244,7 @@ function ShaderGraph() {
               setSearchPosition({ x: event.clientX, y: event.clientY });
               setIsSearchOpen(true);
             }}
-            className="bg-zinc-950"
+            className="bg-zinc-950 notion-canvas"
             proOptions={{ hideAttribution: true }}
           >
             <Background color={theme === 'light' ? '#c4c4ca' : '#27272a'} gap={20} size={1} />
@@ -262,7 +262,7 @@ function ShaderGraph() {
 
         {/* Right Dock */}
         {isDockOpen && (
-          <div className="w-[320px] sm:w-[380px] lg:w-[430px] xl:w-[470px] h-full flex flex-col shrink-0 z-10 border-l border-zinc-800/80 bg-zinc-950 transition-all duration-200">
+          <div className="w-[320px] sm:w-[380px] lg:w-[430px] xl:w-[470px] h-full flex flex-col shrink-0 z-10 border-l border-zinc-800/80 bg-zinc-950 notion-dock transition-all duration-200">
             <div className="h-[330px] lg:h-[390px] shrink-0 border-b border-zinc-800/80">
               <LiveViewport />
             </div>

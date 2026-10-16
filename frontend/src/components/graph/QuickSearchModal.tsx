@@ -148,7 +148,7 @@ export const QuickSearchModal = ({
       }}
     >
       <div 
-        className="fixed bg-zinc-900 border border-zinc-700/80 rounded-xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+        className="fixed bg-zinc-900 border border-zinc-700/80 rounded-lg shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-100"
         style={{
           top: `${top}px`,
           left: `${left}px`,
@@ -160,7 +160,7 @@ export const QuickSearchModal = ({
         onKeyDown={handleKeyDown}
       >
         {/* Search Header */}
-        <div className="p-2 border-b border-zinc-800 flex items-center gap-2 bg-zinc-950/70">
+        <div className="p-3 border-b border-zinc-800 flex items-center gap-2 bg-zinc-950/70">
           <Search size={14} className="text-zinc-500 shrink-0 ml-1" />
           <input 
             ref={inputRef}

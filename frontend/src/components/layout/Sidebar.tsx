@@ -48,26 +48,26 @@ export const Sidebar = () => {
     : availableNodes;
 
   return (
-    <div className="w-full bg-zinc-950 border-r border-zinc-800/80 flex flex-col h-full shrink-0 z-10 select-none">
+    <div className="w-full bg-zinc-900 border-r border-zinc-800/80 flex flex-col h-full shrink-0 z-10 select-none">
       {/* Palette Header & Search */}
-      <div className="p-2.5 border-b border-zinc-800/80 bg-zinc-900/40 shrink-0">
+      <div className="p-4 border-b border-zinc-800/80 bg-zinc-900/40 shrink-0">
         <div className="flex items-center justify-between mb-2 px-0.5">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-300 font-mono">
-            Node Library
+          <span className="text-xs font-semibold tracking-tight text-zinc-200">
+            Node library
           </span>
           <span className="text-[10px] font-mono text-zinc-500">
             {availableNodes.length} NODES
           </span>
         </div>
 
-        <div className="relative">
+        <div className="relative mt-3">
           <Search size={13} className="absolute left-2.5 top-2.5 text-zinc-500 pointer-events-none" />
           <input 
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search nodes..."
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-md py-1.5 pl-8 pr-7 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600/50 transition-colors font-mono"
+            className="w-full bg-zinc-950/60 border border-zinc-800 rounded-md py-2 pl-8 pr-7 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600/50 transition-colors"
           />
           {search && (
             <button 
@@ -82,14 +82,14 @@ export const Sidebar = () => {
       </div>
 
       {/* Nodes List */}
-      <div className="flex-1 overflow-y-auto p-2.5 flex flex-col gap-3.5 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 custom-scrollbar">
         {Object.entries(CATEGORY_CONFIG).map(([category, config]) => {
           const categoryNodes = filteredNodes.filter(n => config.types.includes(n.type));
           if (categoryNodes.length === 0) return null;
 
           return (
             <div key={category} className="flex flex-col gap-1">
-              <div className="flex items-center justify-between px-1 py-0.5 border-b border-zinc-800/50 mb-0.5">
+              <div className="flex items-center justify-between px-1 py-1 border-b border-zinc-800/50 mb-1">
                 <div className="flex items-center gap-1.5">
                   <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
                   <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider font-mono">
@@ -105,11 +105,11 @@ export const Sidebar = () => {
                 {categoryNodes.map(node => {
                   const mainOutput = node.outputs[0]?.type || '';
                   return (
-                    <div 
+                    <div
                       key={node.id}
                       draggable
                       onDragStart={(e) => onDragStart(e, node.type)}
-                      className="px-2 py-1.5 rounded text-xs font-medium text-zinc-300 hover:text-zinc-100 hover:bg-zinc-900/90 border border-transparent hover:border-zinc-800/80 cursor-grab active:cursor-grabbing flex items-center justify-between transition-colors group select-none"
+                      className="px-2.5 py-2 rounded text-xs font-medium text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/60 border border-transparent hover:border-zinc-800/80 cursor-grab active:cursor-grabbing flex items-center justify-between transition-colors group select-none"
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
                         <GripVertical size={12} className="text-zinc-600 group-hover:text-zinc-400 transition-colors shrink-0" />

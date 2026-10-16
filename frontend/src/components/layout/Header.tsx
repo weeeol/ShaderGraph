@@ -77,12 +77,12 @@ export const Header = ({
   };
 
   return (
-    <header className="h-11 bg-zinc-950 border-b border-zinc-800/80 flex items-center justify-between px-3 shrink-0 z-20 select-none">
+    <header className="h-14 bg-zinc-900 border-b border-zinc-800/80 flex items-center justify-between px-4 shrink-0 z-20 select-none">
       {/* Left Title & Workspace Selector */}
       <div className="flex items-center gap-2 min-w-0">
         <button 
           onClick={toggleSidebar}
-          className={`p-1.5 rounded-md transition-colors border ${
+          className={`p-2 rounded-md transition-colors border ${
             isSidebarOpen 
               ? 'text-zinc-100 bg-zinc-800/90 border-zinc-700/80' 
               : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border-transparent hover:border-zinc-800'
@@ -92,14 +92,14 @@ export const Header = ({
           <PanelLeft size={15} />
         </button>
 
-        <span className="text-xs font-bold text-zinc-100 tracking-tight shrink-0 hidden xs:inline">
-          ShaderGraph
+        <span className="text-sm font-semibold text-zinc-100 tracking-tight shrink-0 hidden xs:inline">
+          ShaderGraph <span className="text-zinc-500 font-normal">/ Workspace</span>
         </span>
 
         {onOpenWorkspace && (
           <button
             onClick={onOpenWorkspace}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-900/80 hover:bg-zinc-800/80 border border-zinc-800/80 hover:border-zinc-700 text-xs font-medium text-zinc-300 hover:text-zinc-100 transition-colors group min-w-0"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-zinc-950/50 hover:bg-zinc-800/80 border border-zinc-800/80 hover:border-zinc-700 text-xs font-medium text-zinc-300 hover:text-zinc-100 transition-colors group min-w-0"
             title="Open Workspaces & Starter Templates"
           >
             <FolderOpen size={13} className="text-zinc-400 group-hover:text-zinc-200 shrink-0" />
